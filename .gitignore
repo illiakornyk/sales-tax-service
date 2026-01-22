@@ -141,3 +141,5 @@ vite.config.ts.timestamp-*
 
 pgdata/
 dist/
+
+src/generated/prisma
