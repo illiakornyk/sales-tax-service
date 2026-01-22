@@ -143,3 +143,4 @@ pgdata/
 dist/
 
 src/generated/prisma
+*.csv
