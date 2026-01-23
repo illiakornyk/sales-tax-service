@@ -1,7 +1,15 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 import { GeographyService } from './geography.service';
 
 @Controller('geography')
+@UseGuards(ApiKeyAuthGuard)
 export class GeographyController {
   constructor(private readonly geographyService: GeographyService) {}
 
