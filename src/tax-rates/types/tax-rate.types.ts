@@ -3,11 +3,11 @@ import { jurisdiction_type } from '../../generated/prisma/enums';
 import { ZipCodeWithCities } from '../../geography/types/geography.types';
 
 export type ZipRateBreakdown = {
-  state_rate: Prisma.Decimal;
-  county_rate: Prisma.Decimal;
-  max_city_rate: Prisma.Decimal;
+  state_rate: string;
+  county_rate: string;
+  max_city_rate: string;
   max_city?: {
-    city_id: bigint;
+    city_id: string;
     city_name: string | null;
   };
 };
@@ -16,18 +16,18 @@ export type ZipRateResult = {
   state: TaxRateResponse;
   county: TaxRateResponse;
   city: TaxRateResponse[];
-  total_rate: Prisma.Decimal;
+  total_rate: string;
   breakdown: ZipRateBreakdown;
 };
 
 export type TaxRateResponse = {
-  id: bigint;
+  id: string;
   jurisdiction_type: jurisdiction_type;
   state_code: string;
   county_name: string | null;
-  city_id: bigint | null;
-  rate: Prisma.Decimal;
-  start_time: Date;
+  city_id: string | null;
+  rate: string;
+  start_time: string;
 };
 
 export type NormalizedCreateDto = {
