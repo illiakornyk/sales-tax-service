@@ -12,12 +12,10 @@ import {
   ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { jurisdiction_type } from '../../generated/prisma/enums';
 
-export enum JurisdictionType {
-  STATE = 'STATE',
-  COUNTY = 'COUNTY',
-  CITY = 'CITY',
-}
+export const JurisdictionType = jurisdiction_type;
+export type JurisdictionType = jurisdiction_type;
 
 export class CreateTaxRateDto {
   @ApiProperty({ enum: JurisdictionType })
