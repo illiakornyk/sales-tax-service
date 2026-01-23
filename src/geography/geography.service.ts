@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ZipCodeWithCities } from './types/geography.types';
 
 @Injectable()
 export class GeographyService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getZipCode(zip: string) {
-    return this.prisma.zip_codes.findUnique({
+  async getZipCode(zip: string): Promise<ZipCodeWithCities> {
+    const result = await this.prisma.zip_codes.findUnique({
       where: { zip },
       include: {
         zip_cities: {
@@ -14,13 +15,9 @@ export class GeographyService {
         },
       },
     });
-  }
-
-  async listZipCitiesByZip(zip: string) {
-    return this.prisma.zip_cities.findMany({
-      where: { zip },
-      include: { cities: true, zip_codes: true },
-      orderBy: { city_id: 'asc' },
-    });
+    if (!result) {
+      throw new NotFoundException(`Zip code ${zip} not found`);
+    }
+    return result;
   }
 }
