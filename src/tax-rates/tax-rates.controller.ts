@@ -18,11 +18,11 @@ import { TaxRatesService } from './tax-rates.service';
 @Controller('tax-rates')
 @ApiTags('tax-rates')
 @ApiHeader({ name: 'x-api-key', required: true })
+@UseGuards(ApiKeyAuthGuard)
 export class TaxRatesController {
   constructor(private readonly taxRatesService: TaxRatesService) {}
 
   @Get('zip/:zip')
-  @UseGuards(ApiKeyAuthGuard)
   @ApiOperation({ summary: 'Get tax rates by ZIP and time' })
   async getRatesByZip(
     @Param('zip', ZipCodePipe) zip: string,
@@ -32,7 +32,7 @@ export class TaxRatesController {
   }
 
   @Post()
-  @UseGuards(ApiKeyAuthGuard, AdminOnlyGuard)
+  @UseGuards(AdminOnlyGuard)
   @ApiOperation({ summary: 'Create a new tax rate version' })
   @ApiBody({ type: CreateTaxRateDto })
   async createTaxRate(@Body() dto: CreateTaxRateDto) {
