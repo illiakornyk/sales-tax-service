@@ -39,7 +39,7 @@ export class TaxRatesService {
       county_name: normalized.countyName,
       rate: normalized.rateDecimal,
       start_time: normalized.startTime,
-      ...(cityId ? { cities: { connect: { id: cityId } } } : {}),
+      ...(cityId !== null ? { cities: { connect: { id: cityId } } } : {}),
     });
     return this.toTaxRateResponse(created);
   }
@@ -342,7 +342,7 @@ export class TaxRatesService {
     const maxCityInfo =
       maxCityRate.city_id !== null
         ? {
-            city_id: maxCityRate.city_id,
+            city_id: maxCityRate.city_id.toString(),
             city_name: cityNameById.get(maxCityRate.city_id) ?? null,
           }
         : undefined;
@@ -350,7 +350,8 @@ export class TaxRatesService {
     // Total = state + county + max(city).
     const totalRate = stateRate.rate
       .plus(countyRate.rate)
-      .plus(maxCityRate.rate);
+      .plus(maxCityRate.rate)
+      .toString();
 
     return {
       state: this.toTaxRateResponse(stateRate),
@@ -358,9 +359,9 @@ export class TaxRatesService {
       city: cityRates.map((rate) => this.toTaxRateResponse(rate)),
       total_rate: totalRate,
       breakdown: {
-        state_rate: stateRate.rate,
-        county_rate: countyRate.rate,
-        max_city_rate: maxCityRate.rate,
+        state_rate: stateRate.rate.toString(),
+        county_rate: countyRate.rate.toString(),
+        max_city_rate: maxCityRate.rate.toString(),
         max_city: maxCityInfo,
       },
     };
@@ -376,13 +377,13 @@ export class TaxRatesService {
 
   private toTaxRateResponse(rate: tax_rates): TaxRateResponse {
     return {
-      id: rate.id,
+      id: rate.id.toString(),
       jurisdiction_type: rate.jurisdiction_type,
       state_code: rate.state_code,
       county_name: rate.county_name,
-      city_id: rate.city_id,
-      rate: rate.rate,
-      start_time: rate.start_time,
+      city_id: rate.city_id !== null ? rate.city_id.toString() : null,
+      rate: rate.rate.toString(),
+      start_time: rate.start_time.toISOString(),
     };
   }
 }
