@@ -1,9 +1,9 @@
-import { Prisma, PrismaClient } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import * as fs from 'node:fs';
-import { pipeline } from 'node:stream/promises';
-import * as path from 'node:path';
 import { parse } from 'csv-parse';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { pipeline } from 'node:stream/promises';
+import { Prisma, PrismaClient } from '../src/generated/prisma/client';
 
 const ZIP_CHUNK_SIZE = 2000;
 const CITY_CHUNK_SIZE = 2000;
