@@ -10,6 +10,7 @@ import {
 import { ApiBody, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminOnlyGuard } from '../auth/admin-only.guard';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
+import { ZipCodePipe } from '../common/pipes/zip-code.pipe';
 import { CreateTaxRateDto } from './dto/create-tax-rate.dto';
 import { GetRatesByZipQueryDto } from './dto/get-rates-by-zip.dto';
 import { TaxRatesService } from './tax-rates.service';
@@ -24,7 +25,7 @@ export class TaxRatesController {
   @UseGuards(ApiKeyAuthGuard)
   @ApiOperation({ summary: 'Get tax rates by ZIP and time' })
   async getRatesByZip(
-    @Param('zip') zip: string,
+    @Param('zip', ZipCodePipe) zip: string,
     @Query() query: GetRatesByZipQueryDto,
   ) {
     return this.taxRatesService.getRatesByZip(zip, new Date(query.at));
