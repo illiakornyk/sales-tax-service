@@ -142,5 +142,5 @@ vite.config.ts.timestamp-*
 pgdata/
 dist/
 
-src/generated/prisma
+backend/src/generated/prisma
 *.csv

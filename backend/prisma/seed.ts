@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { parse } from 'csv-parse';
 import * as fs from 'node:fs';
