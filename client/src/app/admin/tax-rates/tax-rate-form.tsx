@@ -86,6 +86,38 @@ export function TaxRateForm() {
     }
   };
 
+  const pad = (value: number) => String(value).padStart(2, "0");
+  const parsedStartTime = (() => {
+    if (!payload.startTime) return null;
+    const parsed = new Date(payload.startTime);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  })();
+  const localDateValue = parsedStartTime
+    ? `${parsedStartTime.getFullYear()}-${pad(
+        parsedStartTime.getMonth() + 1,
+      )}-${pad(parsedStartTime.getDate())}`
+    : "";
+  const localTimeValue = parsedStartTime
+    ? `${pad(parsedStartTime.getHours())}:${pad(parsedStartTime.getMinutes())}`
+    : "";
+
+  const updateFromDateTimeParts = (nextDate: string, nextTime: string) => {
+    if (!nextDate) return;
+    const [year, month, day] = nextDate.split("-").map(Number);
+    const [hours, minutes] = (nextTime || "00:00").split(":").map(Number);
+    if (
+      [year, month, day, hours, minutes].some(
+        (value) => Number.isNaN(value),
+      )
+    ) {
+      return;
+    }
+    const local = new Date(year, month - 1, day, hours, minutes, 0, 0);
+    if (!Number.isNaN(local.getTime())) {
+      updateField("startTime", local.toISOString());
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 px-6 py-12 text-slate-100">
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-8">
@@ -203,6 +235,31 @@ export function TaxRateForm() {
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
               </label>
+              <div className="grid gap-3">
+                <label className="flex flex-col gap-2 text-sm font-medium">
+                  Start date (calendar)
+                  <input
+                    value={localDateValue}
+                    onChange={(event) => {
+                      updateFromDateTimeParts(event.target.value, localTimeValue);
+                    }}
+                    type="date"
+                    className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                  />
+                </label>
+                <label className="flex flex-col gap-2 text-sm font-medium">
+                  Start time (local)
+                  <input
+                    value={localTimeValue}
+                    onChange={(event) => {
+                      updateFromDateTimeParts(localDateValue, event.target.value);
+                    }}
+                    type="time"
+                    step="60"
+                    className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                  />
+                </label>
+              </div>
               <label className="flex flex-col gap-2 text-sm font-medium">
                 Admin API key
                 <input
