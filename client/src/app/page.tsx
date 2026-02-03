@@ -20,6 +20,8 @@ export default function Home() {
   const [rows, setRows] = useState<ZipSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [states, setStates] = useState<string[]>([]);
+  const [statesError, setStatesError] = useState<string | null>(null);
 
   const apiBase = useMemo(
     () => process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000',
@@ -27,6 +29,41 @@ export default function Home() {
   );
 
   const normalizedStateCode = stateCode.trim().toUpperCase();
+
+  useEffect(() => {
+    let active = true;
+
+    const loadStates = async () => {
+      try {
+        const response = await fetch(`${apiBase}/geography/states`, {
+          cache: 'no-store',
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to load states (${response.status}).`);
+        }
+        const data = (await response.json()) as string[];
+        if (active) {
+          setStates(Array.isArray(data) ? data : []);
+          setStatesError(null);
+        }
+      } catch (loadError) {
+        if (active) {
+          setStates([]);
+          setStatesError(
+            loadError instanceof Error
+              ? loadError.message
+              : 'Unable to load states.',
+          );
+        }
+      }
+    };
+
+    void loadStates();
+
+    return () => {
+      active = false;
+    };
+  }, [apiBase]);
 
   const fetchRows = useCallback(async () => {
     if (!normalizedStateCode) {
@@ -91,12 +128,21 @@ export default function Home() {
           <div className="grid gap-4 md:grid-cols-[1.2fr_1fr_1fr_auto] md:items-end">
             <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
               State code
-              <input
+              <select
                 value={stateCode}
                 onChange={(event) => setStateCode(event.target.value)}
-                placeholder="CA"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
-              />
+              >
+                <option value="">Select a state</option>
+                {states.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+              {statesError ? (
+                <span className="text-xs text-rose-500">{statesError}</span>
+              ) : null}
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
               Page size

@@ -14,6 +14,20 @@ type CreateTaxRatePayload = {
   startTime: string;
 };
 
+type ApiError = {
+  status: number;
+  message: string;
+};
+
+type ApiSuccess = {
+  status: number;
+  data: Record<string, unknown> | string | null;
+};
+
+const MAX_RATE = 0.2;
+const MIN_RATE = 0.001;
+const MIN_YEAR = 1970;
+
 const DEFAULT_PAYLOAD: CreateTaxRatePayload = {
   jurisdictionType: "STATE",
   stateCode: "CA",
@@ -25,8 +39,8 @@ export function TaxRateForm() {
   const [payload, setPayload] =
     useState<CreateTaxRatePayload>(DEFAULT_PAYLOAD);
   const [apiKey, setApiKey] = useState("");
-  const [response, setResponse] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<ApiSuccess | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
   const [states, setStates] = useState<string[]>([]);
   const [statesError, setStatesError] = useState<string | null>(null);
@@ -86,7 +100,7 @@ export function TaxRateForm() {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    setResponse(null);
+    setSuccess(null);
     try {
       const response = await fetch(apiEndpoint, {
         method: "POST",
@@ -106,18 +120,33 @@ export function TaxRateForm() {
       });
 
       const text = await response.text();
-      if (!response.ok) {
-        throw new Error(
-          `Request failed (${response.status}): ${text || "unknown error"}`,
-        );
+      let parsed: Record<string, unknown> | string | null = null;
+      if (text) {
+        try {
+          parsed = JSON.parse(text) as Record<string, unknown>;
+        } catch {
+          parsed = text;
+        }
       }
-      setResponse(text);
+
+      if (!response.ok) {
+        const message =
+          typeof parsed === "object" && parsed && "message" in parsed
+            ? String(parsed.message)
+            : text || "Request failed.";
+        setError({ status: response.status, message });
+        return;
+      }
+
+      setSuccess({ status: response.status, data: parsed });
     } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Failed to create tax rate.",
-      );
+      setError({
+        status: 0,
+        message:
+          submitError instanceof Error
+            ? submitError.message
+            : "Failed to create tax rate.",
+      });
     } finally {
       setLoading(false);
     }
@@ -147,6 +176,9 @@ export function TaxRateForm() {
         (value) => Number.isNaN(value),
       )
     ) {
+      return;
+    }
+    if (year < MIN_YEAR) {
       return;
     }
     const local = new Date(year, month - 1, day, hours, minutes, 0, 0);
@@ -221,10 +253,13 @@ export function TaxRateForm() {
                   }
                   type="number"
                   step="0.0001"
-                  min="0"
-                  max="1"
+                  min={MIN_RATE}
+                  max={MAX_RATE}
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
+                <span className="text-xs text-slate-400">
+                  Min {MIN_RATE * 100}%, max {MAX_RATE * 100}%
+                </span>
               </label>
             </div>
 
@@ -283,15 +318,16 @@ export function TaxRateForm() {
               </label>
               <div className="grid gap-3">
                 <label className="flex flex-col gap-2 text-sm font-medium">
-                  Start date (calendar)
-                  <input
-                    value={localDateValue}
-                    onChange={(event) => {
-                      updateFromDateTimeParts(event.target.value, localTimeValue);
-                    }}
-                    type="date"
-                    className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
-                  />
+                Start date (calendar)
+                <input
+                  value={localDateValue}
+                  onChange={(event) => {
+                    updateFromDateTimeParts(event.target.value, localTimeValue);
+                  }}
+                  type="date"
+                  min={`${MIN_YEAR}-01-01`}
+                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium">
                   Start time (local)
@@ -333,12 +369,43 @@ export function TaxRateForm() {
 
           {error ? (
             <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-              {error}
+              <div className="text-xs uppercase tracking-[0.3em] text-rose-200/70">
+                Error {error.status || ""}
+              </div>
+              <div className="mt-1 text-sm font-medium">{error.message}</div>
             </div>
           ) : null}
-          {response ? (
+          {success ? (
             <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-              <pre className="whitespace-pre-wrap text-xs">{response}</pre>
+              <div className="text-xs uppercase tracking-[0.3em] text-emerald-200/70">
+                Success {success.status}
+              </div>
+              {success.data && typeof success.data === "object" ? (
+                <dl className="mt-3 grid gap-2 text-sm text-emerald-100">
+                  {[
+                    ["ID", success.data.id],
+                    ["Jurisdiction", success.data.jurisdiction_type],
+                    ["State", success.data.state_code],
+                    ["County", success.data.county_name],
+                    ["City ID", success.data.city_id],
+                    ["Rate", success.data.rate],
+                    ["Start Time", success.data.start_time],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex justify-between gap-4">
+                      <dt className="text-emerald-200/70">{label}</dt>
+                      <dd className="text-right font-medium">
+                        {value === null || value === undefined
+                          ? "—"
+                          : String(value)}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : (
+                <p className="mt-2 text-sm">
+                  {success.data ? String(success.data) : "Saved."}
+                </p>
+              )}
             </div>
           ) : null}
         </section>
