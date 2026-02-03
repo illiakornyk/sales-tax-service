@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type JurisdictionType = "STATE" | "COUNTY" | "CITY";
 
@@ -28,6 +28,8 @@ export function TaxRateForm() {
   const [response, setResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [states, setStates] = useState<string[]>([]);
+  const [statesError, setStatesError] = useState<string | null>(null);
 
   const apiEndpoint = "/api/admin/tax-rates";
   const apiBase = useMemo(
@@ -44,6 +46,41 @@ export function TaxRateForm() {
   ) => {
     setPayload((prev) => ({ ...prev, [key]: value }));
   };
+
+  useEffect(() => {
+    let active = true;
+
+    const loadStates = async () => {
+      try {
+        const response = await fetch(`${apiBase}/geography/states`, {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to load states (${response.status}).`);
+        }
+        const data = (await response.json()) as string[];
+        if (active) {
+          setStates(Array.isArray(data) ? data : []);
+          setStatesError(null);
+        }
+      } catch (loadError) {
+        if (active) {
+          setStates([]);
+          setStatesError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Unable to load states.",
+          );
+        }
+      }
+    };
+
+    void loadStates();
+
+    return () => {
+      active = false;
+    };
+  }, [apiBase]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -157,14 +194,23 @@ export function TaxRateForm() {
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium">
                 State code
-                <input
+                <select
                   value={payload.stateCode}
                   onChange={(event) =>
                     updateField("stateCode", event.target.value)
                   }
-                  placeholder="CA"
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
-                />
+                >
+                  <option value="">Select a state</option>
+                  {states.map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+                </select>
+                {statesError ? (
+                  <span className="text-xs text-rose-300">{statesError}</span>
+                ) : null}
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium">
                 Rate
