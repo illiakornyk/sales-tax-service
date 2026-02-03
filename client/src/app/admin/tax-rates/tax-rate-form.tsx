@@ -1,8 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from 'react';
+import { Alert } from '../../../components/Alert';
+import { Card } from '../../../components/Card';
+import { FormField } from '../../../components/FormField';
+import { useStateCodes } from '../../../hooks/use-state-codes';
+import { fetchJson, getApiBase } from '../../../lib/api';
 
-type JurisdictionType = "STATE" | "COUNTY" | "CITY";
+type JurisdictionType = 'STATE' | 'COUNTY' | 'CITY';
 
 type CreateTaxRatePayload = {
   jurisdictionType: JurisdictionType;
@@ -29,30 +34,25 @@ const MIN_RATE = 0.001;
 const MIN_YEAR = 1970;
 
 const DEFAULT_PAYLOAD: CreateTaxRatePayload = {
-  jurisdictionType: "STATE",
-  stateCode: "CA",
+  jurisdictionType: 'STATE',
+  stateCode: 'CA',
   rate: 0.0625,
   startTime: new Date().toISOString(),
 };
 
 export function TaxRateForm() {
-  const [payload, setPayload] =
-    useState<CreateTaxRatePayload>(DEFAULT_PAYLOAD);
-  const [apiKey, setApiKey] = useState("");
+  const [payload, setPayload] = useState<CreateTaxRatePayload>(DEFAULT_PAYLOAD);
+  const [apiKey, setApiKey] = useState('');
   const [success, setSuccess] = useState<ApiSuccess | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
-  const [states, setStates] = useState<string[]>([]);
-  const [statesError, setStatesError] = useState<string | null>(null);
+  const { states, error: statesError } = useStateCodes();
 
-  const apiEndpoint = "/api/admin/tax-rates";
-  const apiBase = useMemo(
-    () => process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000",
-    [],
-  );
+  const apiEndpoint = '/api/admin/tax-rates';
+  const apiBase = getApiBase();
 
-  const showCounty = payload.jurisdictionType === "COUNTY";
-  const showCity = payload.jurisdictionType === "CITY";
+  const showCounty = payload.jurisdictionType === 'COUNTY';
+  const showCity = payload.jurisdictionType === 'CITY';
 
   const updateField = <K extends keyof CreateTaxRatePayload>(
     key: K,
@@ -61,52 +61,19 @@ export function TaxRateForm() {
     setPayload((prev) => ({ ...prev, [key]: value }));
   };
 
-  useEffect(() => {
-    let active = true;
-
-    const loadStates = async () => {
-      try {
-        const response = await fetch(`${apiBase}/geography/states`, {
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          throw new Error(`Failed to load states (${response.status}).`);
-        }
-        const data = (await response.json()) as string[];
-        if (active) {
-          setStates(Array.isArray(data) ? data : []);
-          setStatesError(null);
-        }
-      } catch (loadError) {
-        if (active) {
-          setStates([]);
-          setStatesError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Unable to load states.",
-          );
-        }
-      }
-    };
-
-    void loadStates();
-
-    return () => {
-      active = false;
-    };
-  }, [apiBase]);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: React.SyntheticEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
     try {
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
+      const response = await fetchJson<Record<string, unknown>>(apiEndpoint, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
         },
         body: JSON.stringify({
           jurisdictionType: payload.jurisdictionType,
@@ -119,40 +86,26 @@ export function TaxRateForm() {
         }),
       });
 
-      const text = await response.text();
-      let parsed: Record<string, unknown> | string | null = null;
-      if (text) {
-        try {
-          parsed = JSON.parse(text) as Record<string, unknown>;
-        } catch {
-          parsed = text;
-        }
-      }
-
       if (!response.ok) {
-        const message =
-          typeof parsed === "object" && parsed && "message" in parsed
-            ? String(parsed.message)
-            : text || "Request failed.";
-        setError({ status: response.status, message });
+        setError({ status: response.status, message: response.message });
         return;
       }
 
-      setSuccess({ status: response.status, data: parsed });
+      setSuccess({ status: response.status, data: response.data ?? null });
     } catch (submitError) {
       setError({
         status: 0,
         message:
           submitError instanceof Error
             ? submitError.message
-            : "Failed to create tax rate.",
+            : 'Failed to create tax rate.',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const pad = (value: number) => String(value).padStart(2, "0");
+  const pad = (value: number) => String(value).padStart(2, '0');
   const parsedStartTime = (() => {
     if (!payload.startTime) return null;
     const parsed = new Date(payload.startTime);
@@ -162,19 +115,17 @@ export function TaxRateForm() {
     ? `${parsedStartTime.getFullYear()}-${pad(
         parsedStartTime.getMonth() + 1,
       )}-${pad(parsedStartTime.getDate())}`
-    : "";
+    : '';
   const localTimeValue = parsedStartTime
     ? `${pad(parsedStartTime.getHours())}:${pad(parsedStartTime.getMinutes())}`
-    : "";
+    : '';
 
   const updateFromDateTimeParts = (nextDate: string, nextTime: string) => {
     if (!nextDate) return;
-    const [year, month, day] = nextDate.split("-").map(Number);
-    const [hours, minutes] = (nextTime || "00:00").split(":").map(Number);
+    const [year, month, day] = nextDate.split('-').map(Number);
+    const [hours, minutes] = (nextTime || '00:00').split(':').map(Number);
     if (
-      [year, month, day, hours, minutes].some(
-        (value) => Number.isNaN(value),
-      )
+      [year, month, day, hours, minutes].some((value) => Number.isNaN(value))
     ) {
       return;
     }
@@ -183,7 +134,7 @@ export function TaxRateForm() {
     }
     const local = new Date(year, month - 1, day, hours, minutes, 0, 0);
     if (!Number.isNaN(local.getTime())) {
-      updateField("startTime", local.toISOString());
+      updateField('startTime', local.toISOString());
     }
   };
 
@@ -198,22 +149,21 @@ export function TaxRateForm() {
             Configure tax rates
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-slate-400">
-            Create a new tax rate version. State requires only state code. County
-            requires county name. City requires city id or city name (state +
-            city name).
+            Create a new tax rate version. State requires only state code.
+            County requires county name. City requires city id or city name
+            (state + city name).
           </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.7)]">
+        <Card variant="dark">
           <form className="grid gap-5" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-3">
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Jurisdiction
+              <FormField label="Jurisdiction">
                 <select
                   value={payload.jurisdictionType}
                   onChange={(event) =>
                     updateField(
-                      "jurisdictionType",
+                      'jurisdictionType',
                       event.target.value as JurisdictionType,
                     )
                   }
@@ -223,13 +173,16 @@ export function TaxRateForm() {
                   <option value="COUNTY">COUNTY</option>
                   <option value="CITY">CITY</option>
                 </select>
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                State code
+              </FormField>
+              <FormField
+                label="State code"
+                error={statesError}
+                errorClassName="text-rose-300"
+              >
                 <select
                   value={payload.stateCode}
                   onChange={(event) =>
-                    updateField("stateCode", event.target.value)
+                    updateField('stateCode', event.target.value)
                   }
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 >
@@ -240,16 +193,16 @@ export function TaxRateForm() {
                     </option>
                   ))}
                 </select>
-                {statesError ? (
-                  <span className="text-xs text-rose-300">{statesError}</span>
-                ) : null}
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Rate
+              </FormField>
+              <FormField
+                label="Rate"
+                hint={`Min ${MIN_RATE * 100}%, max ${MAX_RATE * 100}%`}
+                hintClassName="text-slate-400"
+              >
                 <input
                   value={payload.rate}
                   onChange={(event) =>
-                    updateField("rate", Number(event.target.value))
+                    updateField('rate', Number(event.target.value))
                   }
                   type="number"
                   step="0.0001"
@@ -257,100 +210,96 @@ export function TaxRateForm() {
                   max={MAX_RATE}
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-                <span className="text-xs text-slate-400">
-                  Min {MIN_RATE * 100}%, max {MAX_RATE * 100}%
-                </span>
-              </label>
+              </FormField>
             </div>
 
             {showCounty ? (
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                County name
+              <FormField label="County name">
                 <input
-                  value={payload.countyName ?? ""}
+                  value={payload.countyName ?? ''}
                   onChange={(event) =>
-                    updateField("countyName", event.target.value)
+                    updateField('countyName', event.target.value)
                   }
                   placeholder="Orange"
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
+              </FormField>
             ) : null}
 
             {showCity ? (
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="flex flex-col gap-2 text-sm font-medium">
-                  City ID
+                <FormField label="City ID">
                   <input
-                    value={payload.cityId ?? ""}
+                    value={payload.cityId ?? ''}
                     onChange={(event) =>
-                      updateField("cityId", Number(event.target.value))
+                      updateField('cityId', Number(event.target.value))
                     }
                     type="number"
                     min="1"
                     className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                   />
-                </label>
-                <label className="flex flex-col gap-2 text-sm font-medium">
-                  City name (optional)
+                </FormField>
+                <FormField label="City name (optional)">
                   <input
-                    value={payload.cityName ?? ""}
+                    value={payload.cityName ?? ''}
                     onChange={(event) =>
-                      updateField("cityName", event.target.value)
+                      updateField('cityName', event.target.value)
                     }
                     placeholder="Los Angeles"
                     className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                   />
-                </label>
+                </FormField>
               </div>
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Start time (ISO-8601)
+              <FormField label="Start time (ISO-8601)">
                 <input
                   value={payload.startTime}
                   onChange={(event) =>
-                    updateField("startTime", event.target.value)
+                    updateField('startTime', event.target.value)
                   }
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
+              </FormField>
               <div className="grid gap-3">
-                <label className="flex flex-col gap-2 text-sm font-medium">
-                Start date (calendar)
-                <input
-                  value={localDateValue}
-                  onChange={(event) => {
-                    updateFromDateTimeParts(event.target.value, localTimeValue);
-                  }}
-                  type="date"
-                  min={`${MIN_YEAR}-01-01`}
-                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
-                />
-                </label>
-                <label className="flex flex-col gap-2 text-sm font-medium">
-                  Start time (local)
+                <FormField label="Start date (calendar)">
+                  <input
+                    value={localDateValue}
+                    onChange={(event) => {
+                      updateFromDateTimeParts(
+                        event.target.value,
+                        localTimeValue,
+                      );
+                    }}
+                    type="date"
+                    min={`${MIN_YEAR}-01-01`}
+                    className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                  />
+                </FormField>
+                <FormField label="Start time (local)">
                   <input
                     value={localTimeValue}
                     onChange={(event) => {
-                      updateFromDateTimeParts(localDateValue, event.target.value);
+                      updateFromDateTimeParts(
+                        localDateValue,
+                        event.target.value,
+                      );
                     }}
                     type="time"
                     step="60"
                     className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                   />
-                </label>
+                </FormField>
               </div>
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Admin API key
+              <FormField label="Admin API key">
                 <input
                   value={apiKey}
                   onChange={(event) => setApiKey(event.target.value)}
                   type="password"
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
+              </FormField>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -359,7 +308,7 @@ export function TaxRateForm() {
                 disabled={loading}
                 className="rounded-xl bg-emerald-400 px-6 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Saving..." : "Create rate"}
+                {loading ? 'Saving...' : 'Create rate'}
               </button>
               <span className="text-xs uppercase tracking-[0.3em] text-slate-500">
                 API {apiEndpoint} · backend {apiBase}
@@ -368,47 +317,55 @@ export function TaxRateForm() {
           </form>
 
           {error ? (
-            <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-              <div className="text-xs uppercase tracking-[0.3em] text-rose-200/70">
-                Error {error.status || ""}
-              </div>
-              <div className="mt-1 text-sm font-medium">{error.message}</div>
+            <div className="mt-4">
+              <Alert
+                variant="error"
+                title={`Error ${error.status || ''}`.trim()}
+              >
+                <div className="text-sm font-medium">{error.message}</div>
+              </Alert>
             </div>
           ) : null}
           {success ? (
-            <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-              <div className="text-xs uppercase tracking-[0.3em] text-emerald-200/70">
-                Success {success.status}
-              </div>
-              {success.data && typeof success.data === "object" ? (
-                <dl className="mt-3 grid gap-2 text-sm text-emerald-100">
-                  {[
-                    ["ID", success.data.id],
-                    ["Jurisdiction", success.data.jurisdiction_type],
-                    ["State", success.data.state_code],
-                    ["County", success.data.county_name],
-                    ["City ID", success.data.city_id],
-                    ["Rate", success.data.rate],
-                    ["Start Time", success.data.start_time],
-                  ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between gap-4">
-                      <dt className="text-emerald-200/70">{label}</dt>
-                      <dd className="text-right font-medium">
-                        {value === null || value === undefined
-                          ? "—"
-                          : String(value)}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : (
-                <p className="mt-2 text-sm">
-                  {success.data ? String(success.data) : "Saved."}
-                </p>
-              )}
+            <div className="mt-4">
+              <Alert variant="success" title={`Success ${success.status}`}>
+                {success.data && typeof success.data === 'object' ? (
+                  (() => {
+                    const successData = success.data as Record<string, unknown>;
+                    const fields: Array<{ label: string; value: unknown }> = [
+                      { label: 'ID', value: successData.id },
+                      { label: 'Jurisdiction', value: successData.jurisdiction_type },
+                      { label: 'State', value: successData.state_code },
+                      { label: 'County', value: successData.county_name },
+                      { label: 'City ID', value: successData.city_id },
+                      { label: 'Rate', value: successData.rate },
+                      { label: 'Start Time', value: successData.start_time },
+                    ];
+
+                    return (
+                      <dl className="mt-2 grid gap-2 text-sm text-emerald-100">
+                        {fields.map(({ label, value }) => (
+                          <div key={label} className="flex justify-between gap-4">
+                            <dt className="text-emerald-200/70">{label}</dt>
+                            <dd className="text-right font-medium">
+                              {value === null || value === undefined
+                                ? '—'
+                                : String(value)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    );
+                  })()
+                ) : (
+                  <p className="text-sm">
+                    {success.data ? String(success.data) : 'Saved.'}
+                  </p>
+                )}
+              </Alert>
             </div>
           ) : null}
-        </section>
+        </Card>
       </main>
     </div>
   );

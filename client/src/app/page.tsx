@@ -1,6 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert } from '../components/Alert';
+import { Card } from '../components/Card';
+import { FormField } from '../components/FormField';
+import { useStateCodes } from '../hooks/use-state-codes';
+import { fetchJson, getApiBase } from '../lib/api';
 
 type ZipSummary = {
   zip: string;
@@ -20,50 +25,11 @@ export default function Home() {
   const [rows, setRows] = useState<ZipSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [states, setStates] = useState<string[]>([]);
-  const [statesError, setStatesError] = useState<string | null>(null);
+  const { states, error: statesError } = useStateCodes();
 
-  const apiBase = useMemo(
-    () => process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000',
-    [],
-  );
+  const apiBase = getApiBase();
 
   const normalizedStateCode = stateCode.trim().toUpperCase();
-
-  useEffect(() => {
-    let active = true;
-
-    const loadStates = async () => {
-      try {
-        const response = await fetch(`${apiBase}/geography/states`, {
-          cache: 'no-store',
-        });
-        if (!response.ok) {
-          throw new Error(`Failed to load states (${response.status}).`);
-        }
-        const data = (await response.json()) as string[];
-        if (active) {
-          setStates(Array.isArray(data) ? data : []);
-          setStatesError(null);
-        }
-      } catch (loadError) {
-        if (active) {
-          setStates([]);
-          setStatesError(
-            loadError instanceof Error
-              ? loadError.message
-              : 'Unable to load states.',
-          );
-        }
-      }
-    };
-
-    void loadStates();
-
-    return () => {
-      active = false;
-    };
-  }, [apiBase]);
 
   const fetchRows = useCallback(async () => {
     if (!normalizedStateCode) {
@@ -79,11 +45,13 @@ export default function Home() {
       url.searchParams.set('skip', String(skip));
       url.searchParams.set('take', String(take));
 
-      const response = await fetch(url, { cache: 'no-store' });
+      const response = await fetchJson<ZipSummary[]>(url, {
+        cache: 'no-store',
+      });
       if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+        throw new Error(response.message);
       }
-      const payload = (await response.json()) as ZipSummary[];
+      const payload = response.data ?? [];
       setRows(Array.isArray(payload) ? payload : []);
     } catch (fetchError) {
       const message =
@@ -124,10 +92,15 @@ export default function Home() {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)] backdrop-blur">
+        <Card variant="light">
           <div className="grid gap-4 md:grid-cols-[1.2fr_1fr_1fr_auto] md:items-end">
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-              State code
+            <FormField
+              label="State code"
+              error={statesError}
+              errorClassName="text-rose-500"
+              className="text-slate-700"
+              hintClassName="text-slate-400"
+            >
               <select
                 value={stateCode}
                 onChange={(event) => setStateCode(event.target.value)}
@@ -140,12 +113,8 @@ export default function Home() {
                   </option>
                 ))}
               </select>
-              {statesError ? (
-                <span className="text-xs text-rose-500">{statesError}</span>
-              ) : null}
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-              Page size
+            </FormField>
+            <FormField label="Page size" className="text-slate-700">
               <input
                 value={take}
                 onChange={(event) => {
@@ -160,9 +129,8 @@ export default function Home() {
                 max={250}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
               />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-              Skip
+            </FormField>
+            <FormField label="Skip" className="text-slate-700">
               <input
                 value={skip}
                 onChange={(event) => {
@@ -176,7 +144,7 @@ export default function Home() {
                 max={100000}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
               />
-            </label>
+            </FormField>
             <button
               onClick={fetchRows}
               className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800"
@@ -200,13 +168,15 @@ export default function Home() {
           </div>
 
           {error ? (
-            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {error}
+            <div className="mt-4">
+              <Alert variant="error" className="text-rose-700">
+                {error}
+              </Alert>
             </div>
           ) : null}
-        </section>
+        </Card>
 
-        <section className="rounded-2xl border border-slate-200 bg-white">
+        <Card variant="plain" className="p-0">
           <div className="border-b border-slate-100 px-6 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
               ZIP Summary
@@ -269,7 +239,7 @@ export default function Home() {
               </tbody>
             </table>
           </div>
-        </section>
+        </Card>
       </main>
     </div>
   );

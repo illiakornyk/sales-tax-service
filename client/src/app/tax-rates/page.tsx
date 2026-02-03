@@ -1,6 +1,11 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
+import { useState } from 'react';
+import { Alert } from '../../components/Alert';
+import { Card } from '../../components/Card';
+import { FormField } from '../../components/FormField';
+import { fetchJson, getApiBase } from '../../lib/api';
+import { formatRate } from '../../lib/format';
 
 type RateRow = {
   id: string;
@@ -28,87 +33,64 @@ type ZipRateResult = {
 const ZIP_REGEX = /^\d{5}$/;
 
 export default function TaxRatesLookupPage() {
-  const [zip, setZip] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  const [zip, setZip] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const [atIso, setAtIso] = useState(new Date().toISOString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ZipRateResult | null>(null);
 
-  const apiBase = useMemo(
-    () => process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000",
-    [],
-  );
+  const apiBase = getApiBase();
 
   const parsedAt = new Date(atIso);
   const atIsValid = !Number.isNaN(parsedAt.getTime());
 
-  const pad = (value: number) => String(value).padStart(2, "0");
+  const pad = (value: number) => String(value).padStart(2, '0');
   const localDateTimeValue = atIsValid
     ? `${parsedAt.getFullYear()}-${pad(parsedAt.getMonth() + 1)}-${pad(
         parsedAt.getDate(),
       )}T${pad(parsedAt.getHours())}:${pad(parsedAt.getMinutes())}`
-    : "";
+    : '';
 
-  const formatRate = (value: string) => {
-    const numeric = Number(value);
-    if (Number.isNaN(numeric)) return value;
-    return `${(numeric * 100).toFixed(2)}%`;
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setResult(null);
 
     if (!ZIP_REGEX.test(zip)) {
-      setError("ZIP code must be 5 digits.");
+      setError('ZIP code must be 5 digits.');
       return;
     }
     if (!atIsValid) {
-      setError("Please provide a valid timestamp.");
+      setError('Please provide a valid timestamp.');
       return;
     }
     if (!apiKey.trim()) {
-      setError("Client API key is required.");
+      setError('Client API key is required.');
       return;
     }
 
     setLoading(true);
     try {
       const url = new URL(`/tax-rates/zip/${zip}`, apiBase);
-      url.searchParams.set("at", parsedAt.toISOString());
+      url.searchParams.set('at', parsedAt.toISOString());
 
-      const response = await fetch(url, {
+      const response = await fetchJson<ZipRateResult>(url, {
         headers: {
-          "x-api-key": apiKey,
-          accept: "application/json",
+          'x-api-key': apiKey,
+          accept: 'application/json',
         },
-        cache: "no-store",
+        cache: 'no-store',
       });
 
-      const text = await response.text();
-      let parsed: ZipRateResult | null = null;
-      if (text) {
-        try {
-          parsed = JSON.parse(text) as ZipRateResult;
-        } catch {
-          throw new Error(text);
-        }
-      }
-
       if (!response.ok) {
-        const message =
-          parsed && typeof parsed === "object" && "message" in parsed
-            ? String((parsed as Record<string, unknown>).message)
-            : text || "Request failed.";
-        throw new Error(`Error ${response.status}: ${message}`);
+        throw new Error(`Error ${response.status}: ${response.message}`);
       }
 
-      setResult(parsed);
+      setResult(response.data ?? null);
     } catch (submitError) {
       setError(
-        submitError instanceof Error ? submitError.message : "Request failed.",
+        submitError instanceof Error ? submitError.message : 'Request failed.',
       );
     } finally {
       setLoading(false);
@@ -131,11 +113,10 @@ export default function TaxRatesLookupPage() {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.7)]">
+        <Card variant="dark">
           <form className="grid gap-5" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-3">
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                ZIP code
+              <FormField label="ZIP code">
                 <input
                   value={zip}
                   onChange={(event) => setZip(event.target.value.trim())}
@@ -144,17 +125,15 @@ export default function TaxRatesLookupPage() {
                   placeholder="05079"
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Timestamp (ISO-8601)
+              </FormField>
+              <FormField label="Timestamp (ISO-8601)">
                 <input
                   value={atIso}
                   onChange={(event) => setAtIso(event.target.value)}
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Timestamp (picker)
+              </FormField>
+              <FormField label="Timestamp (picker)">
                 <input
                   value={localDateTimeValue}
                   onChange={(event) => {
@@ -166,38 +145,37 @@ export default function TaxRatesLookupPage() {
                   type="datetime-local"
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
+              </FormField>
             </div>
             <div className="grid gap-4 md:grid-cols-[2fr_1fr] md:items-end">
-              <label className="flex flex-col gap-2 text-sm font-medium">
-                Client API key
+              <FormField label="Client API key">
                 <input
                   value={apiKey}
                   onChange={(event) => setApiKey(event.target.value)}
                   type="password"
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
-              </label>
+              </FormField>
               <button
                 type="submit"
                 disabled={loading}
                 className="h-10 rounded-xl bg-indigo-400 px-6 text-sm font-semibold text-indigo-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? "Calculating..." : "Calculate"}
+                {loading ? 'Calculating...' : 'Calculate'}
               </button>
             </div>
           </form>
 
           {error ? (
-            <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-              {error}
+            <div className="mt-4">
+              <Alert variant="error">{error}</Alert>
             </div>
           ) : null}
-        </section>
+        </Card>
 
         {result ? (
           <section className="grid gap-6">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+            <Card variant="dark">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                 Total Rate
               </p>
@@ -227,9 +205,9 @@ export default function TaxRatesLookupPage() {
                   </div>
                 ) : null}
               </div>
-            </div>
+            </Card>
 
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+            <Card variant="dark">
               <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
                 Rate details
               </h2>
@@ -249,7 +227,7 @@ export default function TaxRatesLookupPage() {
                     </div>
                     <div className="mt-2 text-xs text-slate-400">
                       {row.state_code}
-                      {row.county_name ? ` · ${row.county_name}` : ""}
+                      {row.county_name ? ` · ${row.county_name}` : ''}
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
                       Start {row.start_time}
@@ -267,7 +245,7 @@ export default function TaxRatesLookupPage() {
                         className="flex items-center justify-between text-sm"
                       >
                         <span className="text-slate-300">
-                          City ID {row.city_id ?? "—"}
+                          City ID {row.city_id ?? '—'}
                         </span>
                         <span className="font-semibold">
                           {formatRate(row.rate)}
@@ -277,7 +255,7 @@ export default function TaxRatesLookupPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </section>
         ) : null}
       </main>
