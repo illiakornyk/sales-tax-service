@@ -27,6 +27,17 @@ export class TaxRatesService {
     const normalized = this.normalizeCreateDto(dto);
     this.validateCreateDto(normalized, dto.jurisdictionType, dto.cityId);
 
+    await this.assertStateExists(normalized.stateCode);
+    if (
+      dto.jurisdictionType === JurisdictionType.COUNTY &&
+      normalized.countyName
+    ) {
+      await this.assertCountyExists(
+        normalized.stateCode,
+        normalized.countyName,
+      );
+    }
+
     const cityId = await this.resolveCityIdForCreate(
       dto.jurisdictionType,
       normalized,
@@ -177,6 +188,29 @@ export class TaxRatesService {
     }
 
     return null;
+  }
+
+  private async assertStateExists(stateCode: string): Promise<void> {
+    const count = await this.prisma.zip_codes.count({
+      where: { state_code: stateCode },
+    });
+    if (count === 0) {
+      throw new BadRequestException(`State not found for ${stateCode}`);
+    }
+  }
+
+  private async assertCountyExists(
+    stateCode: string,
+    countyName: string,
+  ): Promise<void> {
+    const count = await this.prisma.zip_codes.count({
+      where: { state_code: stateCode, county_name: countyName },
+    });
+    if (count === 0) {
+      throw new BadRequestException(
+        `County not found for ${stateCode} ${countyName}`,
+      );
+    }
   }
 
   private async createTaxRateRow(
