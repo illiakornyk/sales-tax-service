@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Alert } from '../../components/Alert';
 import { Card } from '../../components/Card';
 import { FormField } from '../../components/FormField';
+import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
 import { formatRate } from '../../lib/format';
 
@@ -167,6 +168,7 @@ export default function TaxRatesLookupPage() {
               <div className="mt-2 text-4xl font-semibold">
                 {formatRate(result.total_rate)}
               </div>
+              <TaxRateIndicator rate={result.total_rate} className="mt-3" />
               <div className="mt-4 grid gap-2 text-sm text-slate-300">
                 <div className="flex justify-between">
                   <span>State</span>
@@ -217,6 +219,7 @@ export default function TaxRatesLookupPage() {
                     <div className="mt-1 text-xs text-slate-500">
                       Start {toHumanDateTime(row.start_time)}
                     </div>
+                    <TaxRateIndicator rate={row.rate} compact className="mt-3" />
                   </div>
                 ))}
                 <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
@@ -225,18 +228,18 @@ export default function TaxRatesLookupPage() {
                   </div>
                   <div className="mt-3 grid gap-2">
                     {result.city.map((row) => (
-                      <div
-                        key={row.id}
-                        className="flex items-center justify-between text-sm"
-                      >
-                        <span className="text-slate-300">
-                          {row.city_name
-                            ? `${row.city_name} (City ID ${row.city_id ?? '—'})`
-                            : `City ID ${row.city_id ?? '—'}`}
-                        </span>
-                        <span className="font-semibold">
-                          {formatRate(row.rate)}
-                        </span>
+                      <div key={row.id}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-300">
+                            {row.city_name
+                              ? `${row.city_name} (City ID ${row.city_id ?? '—'})`
+                              : `City ID ${row.city_id ?? '—'}`}
+                          </span>
+                          <span className="font-semibold">
+                            {formatRate(row.rate)}
+                          </span>
+                        </div>
+                        <TaxRateIndicator rate={row.rate} compact className="mt-2" />
                       </div>
                     ))}
                   </div>
