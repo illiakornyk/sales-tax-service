@@ -110,6 +110,8 @@ export class TaxRatesService {
       },
     });
 
+    const cityZipCodesById = await this.getCityZipCodesMap(rates);
+
     const seen = new Set<string>();
     const state: CurrentTaxRateItem[] = [];
     const county: CurrentTaxRateItem[] = [];
@@ -122,7 +124,7 @@ export class TaxRatesService {
       }
       seen.add(key);
 
-      const item = this.toCurrentTaxRateItem(rate);
+      const item = this.toCurrentTaxRateItem(rate, cityZipCodesById);
       if (rate.jurisdiction_type === JurisdictionType.STATE) {
         state.push(item);
       } else if (rate.jurisdiction_type === JurisdictionType.COUNTY) {
@@ -453,6 +455,43 @@ export class TaxRatesService {
     return a.greaterThan(b) ? a : b;
   }
 
+  private async getCityZipCodesMap(
+    rates: TaxRateWithCity[],
+  ): Promise<Map<bigint, string[]>> {
+    const cityIds = Array.from(
+      new Set(
+        rates
+          .filter(
+            (rate) =>
+              rate.jurisdiction_type === JurisdictionType.CITY &&
+              rate.city_id !== null,
+          )
+          .map((rate) => rate.city_id as bigint),
+      ),
+    );
+
+    if (cityIds.length === 0) {
+      return new Map();
+    }
+
+    const cityZipRows = await this.prisma.zip_cities.findMany({
+      where: { city_id: { in: cityIds } },
+      select: { city_id: true, zip: true },
+      orderBy: [{ city_id: 'asc' }, { zip: 'asc' }],
+    });
+
+    const zipCodesByCity = new Map<bigint, string[]>();
+    for (const row of cityZipRows) {
+      const existing = zipCodesByCity.get(row.city_id) ?? [];
+      if (!existing.includes(row.zip)) {
+        existing.push(row.zip);
+      }
+      zipCodesByCity.set(row.city_id, existing);
+    }
+
+    return zipCodesByCity;
+  }
+
   private getCurrentRateIdentityKey(rate: tax_rates): string {
     if (rate.jurisdiction_type === JurisdictionType.STATE) {
       return `STATE|${rate.state_code}`;
@@ -463,7 +502,10 @@ export class TaxRatesService {
     return `CITY|${rate.state_code}|${rate.city_id?.toString() ?? ''}`;
   }
 
-  private toCurrentTaxRateItem(rate: TaxRateWithCity): CurrentTaxRateItem {
+  private toCurrentTaxRateItem(
+    rate: TaxRateWithCity,
+    cityZipCodesById: Map<bigint, string[]>,
+  ): CurrentTaxRateItem {
     const base: CurrentTaxRateItem = {
       jurisdiction_type: rate.jurisdiction_type,
       state_code: rate.state_code,
@@ -478,6 +520,7 @@ export class TaxRatesService {
     if (rate.city_id !== null) {
       base.city_id = rate.city_id.toString();
       base.city_name = rate.cities?.city_name ?? null;
+      base.zip_codes = cityZipCodesById.get(rate.city_id) ?? [];
     }
 
     return base;

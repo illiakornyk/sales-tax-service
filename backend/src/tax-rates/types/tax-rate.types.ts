@@ -52,6 +52,7 @@ export type CurrentTaxRateItem = {
   county_name?: string;
   city_id?: string;
   city_name?: string | null;
+  zip_codes?: string[];
   rate_percent: string;
   start_time: string;
 };

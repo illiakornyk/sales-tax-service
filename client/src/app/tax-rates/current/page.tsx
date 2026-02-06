@@ -11,6 +11,7 @@ type CurrentTaxRateItem = {
   county_name?: string;
   city_id?: string;
   city_name?: string | null;
+  zip_codes?: string[];
   rate_percent: string;
   start_time: string;
 };
@@ -140,6 +141,12 @@ function RatesSection({
   title: string;
   items: CurrentTaxRateItem[];
 }) {
+  const [zipModal, setZipModal] = useState<{
+    cityId: string;
+    cityName: string;
+    zipCodes: string[];
+  } | null>(null);
+
   return (
     <Card variant="dark">
       <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
@@ -160,6 +167,15 @@ function RatesSection({
                 {kind === 'city' ? (
                   <th className="px-3 py-2">City Name</th>
                 ) : null}
+                {kind === 'city' ? (
+                  <th className="px-3 py-2">ZIP Count</th>
+                ) : null}
+                {kind === 'city' ? (
+                  <th className="px-3 py-2">ZIP Preview</th>
+                ) : null}
+                {kind === 'city' ? (
+                  <th className="px-3 py-2">ZIP List</th>
+                ) : null}
                 <th className="px-3 py-2">Rate (%)</th>
                 <th className="px-3 py-2">Start Time</th>
               </tr>
@@ -177,6 +193,32 @@ function RatesSection({
                   {kind === 'city' ? (
                     <td className="px-3 py-2">{item.city_name ?? '—'}</td>
                   ) : null}
+                  {kind === 'city' ? (
+                    <td className="px-3 py-2">{item.zip_codes?.length ?? 0}</td>
+                  ) : null}
+                  {kind === 'city' ? (
+                    <td className="px-3 py-2">
+                      {formatZipPreview(item.zip_codes ?? [])}
+                    </td>
+                  ) : null}
+                  {kind === 'city' ? (
+                    <td className="px-3 py-2">
+                      <button
+                        type="button"
+                        disabled={!item.zip_codes?.length}
+                        onClick={() =>
+                          setZipModal({
+                            cityId: item.city_id ?? '—',
+                            cityName: item.city_name ?? '—',
+                            zipCodes: item.zip_codes ?? [],
+                          })
+                        }
+                        className="rounded-md border border-slate-700 px-2 py-1 text-xs font-medium text-slate-200 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        View all
+                      </button>
+                    </td>
+                  ) : null}
                   <td className="px-3 py-2">{toPercent(item.rate_percent)}</td>
                   <td className="px-3 py-2">{toHumanDateTime(item.start_time)}</td>
                 </tr>
@@ -185,6 +227,41 @@ function RatesSection({
           </table>
         </div>
       )}
+      {zipModal ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 p-4">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-100">
+                  ZIP Codes
+                </h3>
+                <p className="mt-1 text-sm text-slate-400">
+                  {zipModal.cityName} (City ID: {zipModal.cityId})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setZipModal(null)}
+                className="rounded-md border border-slate-700 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800"
+              >
+                Close
+              </button>
+            </div>
+            <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-slate-800 p-3">
+              <div className="grid grid-cols-4 gap-2 text-sm text-slate-200">
+                {zipModal.zipCodes.map((zip) => (
+                  <span
+                    key={zip}
+                    className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-center"
+                  >
+                    {zip}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </Card>
   );
 }
@@ -218,4 +295,18 @@ function toHumanDateTime(value: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function formatZipPreview(zipCodes: string[]): string {
+  if (zipCodes.length === 0) {
+    return '—';
+  }
+
+  const preview = zipCodes.slice(0, 3).join(', ');
+  const remaining = zipCodes.length - 3;
+  if (remaining <= 0) {
+    return preview;
+  }
+
+  return `${preview} +${remaining} more`;
 }
