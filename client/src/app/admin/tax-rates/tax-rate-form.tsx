@@ -119,6 +119,10 @@ export function TaxRateForm() {
   const localTimeValue = parsedStartTime
     ? `${pad(parsedStartTime.getHours())}:${pad(parsedStartTime.getMinutes())}`
     : '';
+  const localDateTimeValue =
+    localDateValue && localTimeValue
+      ? `${localDateValue}T${localTimeValue}`
+      : '';
 
   const updateFromDateTimeParts = (nextDate: string, nextTime: string) => {
     if (!nextDate) return;
@@ -262,36 +266,21 @@ export function TaxRateForm() {
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 />
               </FormField>
-              <div className="grid gap-3">
-                <FormField label="Start date (calendar)">
-                  <input
-                    value={localDateValue}
-                    onChange={(event) => {
-                      updateFromDateTimeParts(
-                        event.target.value,
-                        localTimeValue,
-                      );
-                    }}
-                    type="date"
-                    min={`${MIN_YEAR}-01-01`}
-                    className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
-                  />
-                </FormField>
-                <FormField label="Start time (local)">
-                  <input
-                    value={localTimeValue}
-                    onChange={(event) => {
-                      updateFromDateTimeParts(
-                        localDateValue,
-                        event.target.value,
-                      );
-                    }}
-                    type="time"
-                    step="60"
-                    className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
-                  />
-                </FormField>
-              </div>
+              <FormField label="Start date & time (calendar)">
+                <input
+                  value={localDateTimeValue}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (!value) return;
+                    const [nextDate, nextTime = '00:00'] = value.split('T');
+                    updateFromDateTimeParts(nextDate, nextTime);
+                  }}
+                  type="datetime-local"
+                  min={`${MIN_YEAR}-01-01T00:00`}
+                  step="60"
+                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                />
+              </FormField>
               <FormField label="Admin API key">
                 <input
                   value={apiKey}
