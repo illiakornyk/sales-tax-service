@@ -13,6 +13,7 @@ type RateRow = {
   state_code: string;
   county_name: string | null;
   city_id: string | null;
+  city_name?: string | null;
   rate: string;
   start_time: string;
 };
@@ -214,7 +215,7 @@ export default function TaxRatesLookupPage() {
                       {row.county_name ? ` · ${row.county_name}` : ''}
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      Start {row.start_time}
+                      Start {toHumanDateTime(row.start_time)}
                     </div>
                   </div>
                 ))}
@@ -229,7 +230,9 @@ export default function TaxRatesLookupPage() {
                         className="flex items-center justify-between text-sm"
                       >
                         <span className="text-slate-300">
-                          City ID {row.city_id ?? '—'}
+                          {row.city_name
+                            ? `${row.city_name} (City ID ${row.city_id ?? '—'})`
+                            : `City ID ${row.city_id ?? '—'}`}
                         </span>
                         <span className="font-semibold">
                           {formatRate(row.rate)}
@@ -245,4 +248,18 @@ export default function TaxRatesLookupPage() {
       </main>
     </div>
   );
+}
+
+function toHumanDateTime(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }

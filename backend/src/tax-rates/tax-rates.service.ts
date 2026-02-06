@@ -440,7 +440,12 @@ export class TaxRatesService {
     return {
       state: this.toTaxRateResponse(stateRate),
       county: this.toTaxRateResponse(countyRate),
-      city: cityRates.map((rate) => this.toTaxRateResponse(rate)),
+      city: cityRates.map((rate) =>
+        this.toTaxRateResponse(
+          rate,
+          rate.city_id !== null ? (cityNameById.get(rate.city_id) ?? null) : null,
+        ),
+      ),
       total_rate: totalRate,
       breakdown: {
         state_rate: stateRate.rate.toString(),
@@ -530,13 +535,17 @@ export class TaxRatesService {
     return at.toISOString();
   }
 
-  private toTaxRateResponse(rate: tax_rates): TaxRateResponse {
+  private toTaxRateResponse(
+    rate: tax_rates,
+    cityName: string | null = null,
+  ): TaxRateResponse {
     return {
       id: rate.id.toString(),
       jurisdiction_type: rate.jurisdiction_type,
       state_code: rate.state_code,
       county_name: rate.county_name,
       city_id: rate.city_id !== null ? rate.city_id.toString() : null,
+      city_name: cityName,
       rate: rate.rate.toString(),
       start_time: rate.start_time.toISOString(),
     };

@@ -26,6 +26,7 @@ export type TaxRateResponse = {
   state_code: string;
   county_name: string | null;
   city_id: string | null;
+  city_name?: string | null;
   rate: string;
   start_time: string;
 };
