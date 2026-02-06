@@ -17,8 +17,6 @@ import { TaxRatesService } from './tax-rates.service';
 
 @Controller('tax-rates')
 @ApiTags('tax-rates')
-@ApiHeader({ name: 'x-api-key', required: true })
-@UseGuards(ApiKeyAuthGuard)
 export class TaxRatesController {
   constructor(private readonly taxRatesService: TaxRatesService) {}
 
@@ -32,7 +30,12 @@ export class TaxRatesController {
   }
 
   @Post()
-  @UseGuards(AdminOnlyGuard)
+  @ApiHeader({
+    name: 'x-api-key',
+    required: true,
+    description: 'Admin API key',
+  })
+  @UseGuards(ApiKeyAuthGuard, AdminOnlyGuard)
   @ApiOperation({ summary: 'Create a new tax rate version' })
   @ApiBody({ type: CreateTaxRateDto })
   async createTaxRate(@Body() dto: CreateTaxRateDto) {

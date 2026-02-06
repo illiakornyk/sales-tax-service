@@ -34,7 +34,6 @@ const ZIP_REGEX = /^\d{5}$/;
 
 export default function TaxRatesLookupPage() {
   const [zip, setZip] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const [atIso, setAtIso] = useState(new Date().toISOString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,10 +64,6 @@ export default function TaxRatesLookupPage() {
       setError('Please provide a valid timestamp.');
       return;
     }
-    if (!apiKey.trim()) {
-      setError('Client API key is required.');
-      return;
-    }
 
     setLoading(true);
     try {
@@ -76,10 +71,7 @@ export default function TaxRatesLookupPage() {
       url.searchParams.set('at', parsedAt.toISOString());
 
       const response = await fetchJson<ZipRateResult>(url, {
-        headers: {
-          'x-api-key': apiKey,
-          accept: 'application/json',
-        },
+        headers: { accept: 'application/json' },
         cache: 'no-store',
       });
 
@@ -147,15 +139,7 @@ export default function TaxRatesLookupPage() {
                 />
               </FormField>
             </div>
-            <div className="grid gap-4 md:grid-cols-[2fr_1fr] md:items-end">
-              <FormField label="Client API key">
-                <input
-                  value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
-                  type="password"
-                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
-                />
-              </FormField>
+            <div className="grid gap-4 md:grid-cols-1 md:items-end">
               <button
                 type="submit"
                 disabled={loading}
