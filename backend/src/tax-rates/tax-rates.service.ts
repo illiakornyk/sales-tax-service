@@ -9,12 +9,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, tax_rates } from '../generated/prisma/client';
 import { CreateTaxRateDto, JurisdictionType } from './dto/create-tax-rate.dto';
 import {
+  CurrentTaxRateItem,
+  CurrentTaxRatesResponse,
   EffectiveRates,
   NormalizedCreateDto,
   TaxRateResponse,
   ZipInfo,
   ZipRateResult,
 } from './types/tax-rate.types';
+
+type TaxRateWithCity = Prisma.tax_ratesGetPayload<{
+  include: { cities: { select: { city_name: true } } };
+}>;
 
 @Injectable()
 export class TaxRatesService {
@@ -90,6 +96,48 @@ export class TaxRatesService {
       maxCityRate,
       zipInfo,
     );
+  }
+
+  async getCurrentActiveRates(): Promise<CurrentTaxRatesResponse> {
+    const now = new Date();
+    const rates = await this.prisma.tax_rates.findMany({
+      where: { start_time: { lte: now } },
+      orderBy: [{ start_time: 'desc' }, { id: 'desc' }],
+      include: {
+        cities: {
+          select: { city_name: true },
+        },
+      },
+    });
+
+    const seen = new Set<string>();
+    const state: CurrentTaxRateItem[] = [];
+    const county: CurrentTaxRateItem[] = [];
+    const city: CurrentTaxRateItem[] = [];
+
+    for (const rate of rates) {
+      const key = this.getCurrentRateIdentityKey(rate);
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+
+      const item = this.toCurrentTaxRateItem(rate);
+      if (rate.jurisdiction_type === JurisdictionType.STATE) {
+        state.push(item);
+      } else if (rate.jurisdiction_type === JurisdictionType.COUNTY) {
+        county.push(item);
+      } else {
+        city.push(item);
+      }
+    }
+
+    return {
+      as_of: now.toISOString(),
+      state,
+      county,
+      city,
+    };
   }
 
   private normalizeCreateDto(dto: CreateTaxRateDto): NormalizedCreateDto {
@@ -403,6 +451,36 @@ export class TaxRatesService {
 
   private decimalMax(a: Prisma.Decimal, b: Prisma.Decimal): Prisma.Decimal {
     return a.greaterThan(b) ? a : b;
+  }
+
+  private getCurrentRateIdentityKey(rate: tax_rates): string {
+    if (rate.jurisdiction_type === JurisdictionType.STATE) {
+      return `STATE|${rate.state_code}`;
+    }
+    if (rate.jurisdiction_type === JurisdictionType.COUNTY) {
+      return `COUNTY|${rate.state_code}|${rate.county_name ?? ''}`;
+    }
+    return `CITY|${rate.state_code}|${rate.city_id?.toString() ?? ''}`;
+  }
+
+  private toCurrentTaxRateItem(rate: TaxRateWithCity): CurrentTaxRateItem {
+    const base: CurrentTaxRateItem = {
+      jurisdiction_type: rate.jurisdiction_type,
+      state_code: rate.state_code,
+      rate_percent: rate.rate.mul(100).toString(),
+      start_time: rate.start_time.toISOString(),
+    };
+
+    if (rate.county_name) {
+      base.county_name = rate.county_name;
+    }
+
+    if (rate.city_id !== null) {
+      base.city_id = rate.city_id.toString();
+      base.city_name = rate.cities?.city_name ?? null;
+    }
+
+    return base;
   }
 
   private formatTimestamp(at: Date): string {

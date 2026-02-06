@@ -45,3 +45,20 @@ export type EffectiveRates = {
   countyRate: tax_rates | null;
   cityRatesById: Map<bigint, tax_rates>;
 };
+
+export type CurrentTaxRateItem = {
+  jurisdiction_type: jurisdiction_type;
+  state_code: string;
+  county_name?: string;
+  city_id?: string;
+  city_name?: string | null;
+  rate_percent: string;
+  start_time: string;
+};
+
+export type CurrentTaxRatesResponse = {
+  as_of: string;
+  state: CurrentTaxRateItem[];
+  county: CurrentTaxRateItem[];
+  city: CurrentTaxRateItem[];
+};

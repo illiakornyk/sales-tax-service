@@ -20,6 +20,14 @@ import { TaxRatesService } from './tax-rates.service';
 export class TaxRatesController {
   constructor(private readonly taxRatesService: TaxRatesService) {}
 
+  @Get('current')
+  @ApiOperation({
+    summary: 'Get currently effective tax rates grouped by jurisdiction',
+  })
+  async getCurrentActiveRates() {
+    return this.taxRatesService.getCurrentActiveRates();
+  }
+
   @Get('zip/:zip')
   @ApiOperation({ summary: 'Get tax rates by ZIP and time' })
   async getRatesByZip(
