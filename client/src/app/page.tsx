@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../components/Alert';
 import { Card } from '../components/Card';
 import { FormField } from '../components/FormField';
+import { LoadingInline, TableSkeletonRows } from '../components/LoadingState';
 import { useStateCodes } from '../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../lib/api';
 
@@ -25,7 +26,7 @@ export default function Home() {
   const [rows, setRows] = useState<ZipSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { states, error: statesError } = useStateCodes();
+  const { states, error: statesError, loading: statesLoading } = useStateCodes();
 
   const apiBase = getApiBase();
 
@@ -104,9 +105,12 @@ export default function Home() {
               <select
                 value={stateCode}
                 onChange={(event) => setStateCode(event.target.value)}
+                disabled={statesLoading}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
               >
-                <option value="">Select a state</option>
+                <option value="">
+                  {statesLoading ? 'Loading states...' : 'Select a state'}
+                </option>
                 {states.map((code) => (
                   <option key={code} value={code}>
                     {code}
@@ -155,9 +159,13 @@ export default function Home() {
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
             <div className="flex items-center gap-3">
-              <span>
-                Showing {rows.length} ZIP{rows.length === 1 ? '' : 's'}
-              </span>
+              {loading ? (
+                <LoadingInline label="Fetching ZIP records..." className="text-slate-600" />
+              ) : (
+                <span>
+                  Showing {rows.length} ZIP{rows.length === 1 ? '' : 's'}
+                </span>
+              )}
               <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
                 Page {currentPage}
               </span>
@@ -214,18 +222,22 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {rows.map((row) => (
-                  <tr key={row.zip} className="hover:bg-slate-50">
-                    <td className="px-6 py-3 font-semibold text-slate-900">
-                      {row.zip}
-                    </td>
-                    <td className="px-6 py-3">{row.state_code}</td>
-                    <td className="px-6 py-3">{row.county_name ?? '—'}</td>
-                    <td className="px-6 py-3">
-                      {row.primary_city_name ?? '—'}
-                    </td>
-                  </tr>
-                ))}
+                {loading ? (
+                  <TableSkeletonRows columns={4} rows={8} tone="light" />
+                ) : (
+                  rows.map((row) => (
+                    <tr key={row.zip} className="hover:bg-slate-50">
+                      <td className="px-6 py-3 font-semibold text-slate-900">
+                        {row.zip}
+                      </td>
+                      <td className="px-6 py-3">{row.state_code}</td>
+                      <td className="px-6 py-3">{row.county_name ?? '—'}</td>
+                      <td className="px-6 py-3">
+                        {row.primary_city_name ?? '—'}
+                      </td>
+                    </tr>
+                  ))
+                )}
                 {!loading && rows.length === 0 ? (
                   <tr>
                     <td

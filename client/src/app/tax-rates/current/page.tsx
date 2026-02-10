@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../../../components/Alert';
 import { Card } from '../../../components/Card';
+import { LoadingInline, TableSkeletonRows } from '../../../components/LoadingState';
 import { fetchJson, getApiBase } from '../../../lib/api';
 
 type CurrentTaxRateItem = {
@@ -95,6 +96,8 @@ export default function CurrentTaxRatesPage() {
           </Alert>
         ) : null}
 
+        {loading ? <LoadingInline label="Loading current rates..." /> : null}
+
         {data ? (
           <Card variant="dark">
             <div className="grid gap-2 text-sm text-slate-300 md:grid-cols-4">
@@ -115,6 +118,29 @@ export default function CurrentTaxRatesPage() {
                 <p className="font-medium">{data.city.length}</p>
               </div>
             </div>
+          </Card>
+        ) : null}
+
+        {loading && !data ? (
+          <Card variant="dark">
+            <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-800" />
+            <table className="w-full table-fixed text-left text-sm">
+              <thead className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                <tr>
+                  <th className="px-3 py-2">State</th>
+                  <th className="px-3 py-2">Rate (%)</th>
+                  <th className="px-3 py-2">Start Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800 text-slate-300">
+                <TableSkeletonRows
+                  columns={3}
+                  rows={4}
+                  tone="dark"
+                  cellClassName="px-3 py-2"
+                />
+              </tbody>
+            </table>
           </Card>
         ) : null}
 

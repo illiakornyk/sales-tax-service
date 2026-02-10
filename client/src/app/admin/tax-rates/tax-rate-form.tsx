@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Alert } from '../../../components/Alert';
 import { Card } from '../../../components/Card';
 import { FormField } from '../../../components/FormField';
+import { LoadingInline } from '../../../components/LoadingState';
 import { useStateCodes } from '../../../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../../../lib/api';
 
@@ -46,7 +47,7 @@ export function TaxRateForm() {
   const [success, setSuccess] = useState<ApiSuccess | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
-  const { states, error: statesError } = useStateCodes();
+  const { states, error: statesError, loading: statesLoading } = useStateCodes();
 
   const apiEndpoint = '/api/admin/tax-rates';
   const apiBase = getApiBase();
@@ -161,6 +162,7 @@ export function TaxRateForm() {
 
         <Card variant="dark">
           <form className="grid gap-5" onSubmit={handleSubmit}>
+            <fieldset disabled={loading} className="grid gap-5">
             <div className="grid gap-4 md:grid-cols-3">
               <FormField label="Jurisdiction">
                 <select
@@ -188,9 +190,12 @@ export function TaxRateForm() {
                   onChange={(event) =>
                     updateField('stateCode', event.target.value)
                   }
+                  disabled={statesLoading}
                   className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
                 >
-                  <option value="">Select a state</option>
+                  <option value="">
+                    {statesLoading ? 'Loading states...' : 'Select a state'}
+                  </option>
                   {states.map((code) => (
                     <option key={code} value={code}>
                       {code}
@@ -303,7 +308,14 @@ export function TaxRateForm() {
                 API {apiEndpoint} · backend {apiBase}
               </span>
             </div>
+            </fieldset>
           </form>
+
+          {loading ? (
+            <div className="mt-4">
+              <LoadingInline label="Saving tax rate version..." />
+            </div>
+          ) : null}
 
           {error ? (
             <div className="mt-4">

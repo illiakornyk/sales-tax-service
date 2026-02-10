@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Alert } from '../../components/Alert';
 import { Card } from '../../components/Card';
 import { FormField } from '../../components/FormField';
+import { LoadingInline } from '../../components/LoadingState';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
 import { formatRate } from '../../lib/format';
@@ -155,6 +156,11 @@ export default function TaxRatesLookupPage() {
           {error ? (
             <div className="mt-4">
               <Alert variant="error">{error}</Alert>
+            </div>
+          ) : null}
+          {loading ? (
+            <div className="mt-4">
+              <LoadingInline label="Calculating effective tax rates..." />
             </div>
           ) : null}
         </Card>
