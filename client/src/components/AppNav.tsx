@@ -62,9 +62,7 @@ export function AppNav() {
         <div className="flex items-center gap-3">
           <ul className="flex items-center gap-2">
           {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== '/' && pathname?.startsWith(item.href));
+            const isActive = pathname === item.href;
 
             return (
               <li key={item.href}>
