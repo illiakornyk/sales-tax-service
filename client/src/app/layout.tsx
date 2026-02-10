@@ -18,13 +18,35 @@ export const metadata: Metadata = {
   description: "Sales tax lookup and admin management",
 };
 
+const themeInitScript = `
+(() => {
+  const key = 'theme-preference';
+  const stored = localStorage.getItem(key);
+  const preference =
+    stored === 'light' || stored === 'dark' || stored === 'system'
+      ? stored
+      : 'system';
+
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const resolved = preference === 'system' ? (isDark ? 'dark' : 'light') : preference;
+
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.setAttribute('data-theme-preference', preference);
+  document.documentElement.classList.toggle('dark', resolved === 'dark');
+  document.documentElement.style.colorScheme = resolved;
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

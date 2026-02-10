@@ -75,18 +75,18 @@ export default function Home() {
   const hasNext = rows.length === take;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900 dark:bg-[radial-gradient(circle_at_top,_#111827,_#020617_40%,_#020617_70%)] dark:text-slate-100">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 font-sans">
         <header className="flex flex-col gap-3">
-          <p className="text-sm uppercase tracking-[0.4em] text-slate-500">
+          <p className="text-sm uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
             Geography Explorer
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
             Browse ZIPs by state
           </h1>
-          <p className="max-w-2xl text-base text-slate-600">
+          <p className="max-w-2xl text-base text-slate-600 dark:text-slate-300">
             Pulling data from the backend endpoint{' '}
-            <span className="font-medium text-slate-800">
+            <span className="font-medium text-slate-800 dark:text-slate-200">
               /geography/state/:stateCode
             </span>
             . Update the filters below and reload to view ZIP summaries.
@@ -99,14 +99,14 @@ export default function Home() {
               label="State code"
               error={statesError}
               errorClassName="text-rose-500"
-              className="text-slate-700"
-              hintClassName="text-slate-400"
+              className="text-slate-700 dark:text-slate-300"
+              hintClassName="text-slate-500 dark:text-slate-400"
             >
               <select
                 value={stateCode}
                 onChange={(event) => setStateCode(event.target.value)}
                 disabled={statesLoading}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600"
               >
                 <option value="">
                   {statesLoading ? 'Loading states...' : 'Select a state'}
@@ -118,7 +118,7 @@ export default function Home() {
                 ))}
               </select>
             </FormField>
-            <FormField label="Page size" className="text-slate-700">
+            <FormField label="Page size" className="text-slate-700 dark:text-slate-300">
               <input
                 value={take}
                 onChange={(event) => {
@@ -131,10 +131,10 @@ export default function Home() {
                 type="number"
                 min={1}
                 max={250}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600"
               />
             </FormField>
-            <FormField label="Skip" className="text-slate-700">
+            <FormField label="Skip" className="text-slate-700 dark:text-slate-300">
               <input
                 value={skip}
                 onChange={(event) => {
@@ -146,38 +146,41 @@ export default function Home() {
                 type="number"
                 min={0}
                 max={100000}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600"
               />
             </FormField>
             <button
               onClick={fetchRows}
-              className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800"
+              className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
             >
               {loading ? 'Loading...' : 'Reload'}
             </button>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-3">
               {loading ? (
-                <LoadingInline label="Fetching ZIP records..." className="text-slate-600" />
+                <LoadingInline
+                  label="Fetching ZIP records..."
+                  className="text-slate-600 dark:text-slate-300"
+                />
               ) : (
                 <span>
                   Showing {rows.length} ZIP{rows.length === 1 ? '' : 's'}
                 </span>
               )}
-              <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
+              <span className="text-xs uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
                 Page {currentPage}
               </span>
             </div>
-            <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
+            <span className="text-xs uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
               API base: {apiBase}
             </span>
           </div>
 
           {error ? (
             <div className="mt-4">
-              <Alert variant="error" className="text-rose-700">
+              <Alert variant="error">
                 {error}
               </Alert>
             </div>
@@ -185,35 +188,35 @@ export default function Home() {
         </Card>
 
         <Card variant="plain" className="p-0">
-          <div className="border-b border-slate-100 px-6 py-4">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
+          <div className="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
               ZIP Summary
             </h2>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 text-sm text-slate-600">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSkip(Math.max(skip - take, 0))}
                 disabled={!hasPrev || loading}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
               >
                 Prev
               </button>
               <button
                 onClick={() => setSkip(skip + take)}
                 disabled={!hasNext || loading}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
               >
                 Next
               </button>
             </div>
-            <span className="text-xs uppercase tracking-[0.25em] text-slate-400">
+            <span className="text-xs uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
               offset {skip} · limit {take}
             </span>
           </div>
           <div className="max-h-[540px] overflow-auto">
             <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 bg-white text-xs uppercase tracking-[0.18em] text-slate-400">
+              <thead className="sticky top-0 bg-white text-xs uppercase tracking-[0.18em] text-slate-400 dark:bg-slate-900 dark:text-slate-500">
                 <tr>
                   <th className="px-6 py-3">ZIP</th>
                   <th className="px-6 py-3">State</th>
@@ -221,13 +224,16 @@ export default function Home() {
                   <th className="px-6 py-3">Primary City</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
                 {loading ? (
                   <TableSkeletonRows columns={4} rows={8} tone="light" />
                 ) : (
                   rows.map((row) => (
-                    <tr key={row.zip} className="hover:bg-slate-50">
-                      <td className="px-6 py-3 font-semibold text-slate-900">
+                    <tr
+                      key={row.zip}
+                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    >
+                      <td className="px-6 py-3 font-semibold text-slate-900 dark:text-slate-100">
                         {row.zip}
                       </td>
                       <td className="px-6 py-3">{row.state_code}</td>
@@ -242,7 +248,7 @@ export default function Home() {
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-8 text-center text-sm text-slate-500"
+                      className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400"
                     >
                       No data found for this state.
                     </td>

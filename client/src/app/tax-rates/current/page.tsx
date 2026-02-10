@@ -66,7 +66,7 @@ export default function CurrentTaxRatesPage() {
   }, [loadCurrentRates]);
 
   return (
-    <div className="min-h-screen bg-slate-950 px-6 py-12 text-slate-100">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900 dark:bg-[radial-gradient(circle_at_top,_#111827,_#020617_40%,_#020617_70%)] dark:text-slate-100">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -76,7 +76,7 @@ export default function CurrentTaxRatesPage() {
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">
               Current active rates
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-slate-400">
+            <p className="mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
               Shows latest active rows from tax rates per jurisdiction identity.
             </p>
           </div>
@@ -84,7 +84,7 @@ export default function CurrentTaxRatesPage() {
             type="button"
             onClick={() => void loadCurrentRates()}
             disabled={loading}
-            className="h-10 rounded-xl bg-slate-200 px-5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
@@ -99,8 +99,8 @@ export default function CurrentTaxRatesPage() {
         {loading ? <LoadingInline label="Loading current rates..." /> : null}
 
         {data ? (
-          <Card variant="dark">
-            <div className="grid gap-2 text-sm text-slate-300 md:grid-cols-4">
+          <Card variant="light">
+            <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-300 md:grid-cols-4">
               <div>
                 <span className="text-slate-500">As of</span>
                 <p className="font-medium">{toHumanDateTime(data.as_of)}</p>
@@ -122,21 +122,21 @@ export default function CurrentTaxRatesPage() {
         ) : null}
 
         {loading && !data ? (
-          <Card variant="dark">
-            <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-800" />
+          <Card variant="light">
+            <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
             <table className="w-full table-fixed text-left text-sm">
-              <thead className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              <thead className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                 <tr>
                   <th className="px-3 py-2">State</th>
                   <th className="px-3 py-2">Rate (%)</th>
                   <th className="px-3 py-2">Start Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-300">
+              <tbody className="divide-y divide-slate-200 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
                 <TableSkeletonRows
                   columns={3}
                   rows={4}
-                  tone="dark"
+                  tone="light"
                   cellClassName="px-3 py-2"
                 />
               </tbody>
@@ -174,16 +174,18 @@ function RatesSection({
   } | null>(null);
 
   return (
-    <Card variant="dark">
-      <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
+    <Card variant="light">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
         {title}
       </h2>
       {items.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-500">No active records.</p>
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+          No active records.
+        </p>
       ) : (
         <div className="mt-4 overflow-x-auto">
           <table className="w-full table-fixed text-left text-sm">
-            <thead className="text-xs uppercase tracking-[0.18em] text-slate-500">
+            <thead className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
               <tr>
                 <th className="px-3 py-2">State</th>
                 {kind === 'county' ? (
@@ -206,7 +208,7 @@ function RatesSection({
                 <th className="px-3 py-2">Start Time</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300">
+            <tbody className="divide-y divide-slate-200 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
               {items.map((item) => (
                 <tr key={getRowKey(item)}>
                   <td className="px-3 py-2">{item.state_code}</td>
@@ -239,7 +241,7 @@ function RatesSection({
                             zipCodes: item.zip_codes ?? [],
                           })
                         }
-                        className="rounded-md border border-slate-700 px-2 py-1 text-xs font-medium text-slate-200 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         View all
                       </button>
@@ -255,30 +257,30 @@ function RatesSection({
       )}
       {zipModal ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 p-4">
-          <div className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-5">
+          <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-100">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   ZIP Codes
                 </h3>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   {zipModal.cityName} (City ID: {zipModal.cityId})
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setZipModal(null)}
-                className="rounded-md border border-slate-700 px-3 py-1 text-sm text-slate-200 hover:bg-slate-800"
+                className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 Close
               </button>
             </div>
-            <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-slate-800 p-3">
-              <div className="grid grid-cols-4 gap-2 text-sm text-slate-200">
+            <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+              <div className="grid grid-cols-4 gap-2 text-sm text-slate-700 dark:text-slate-200">
                 {zipModal.zipCodes.map((zip) => (
                   <span
                     key={zip}
-                    className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-center"
+                    className="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-center dark:border-slate-700 dark:bg-slate-950"
                   >
                     {zip}
                   </span>

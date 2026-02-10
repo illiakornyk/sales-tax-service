@@ -34,6 +34,10 @@ type ZipRateResult = {
 };
 
 const ZIP_REGEX = /^\d{5}$/;
+const inputClass =
+  'rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600';
+const detailCardClass =
+  'rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/40';
 
 export default function TaxRatesLookupPage() {
   const [zip, setZip] = useState('');
@@ -93,16 +97,16 @@ export default function TaxRatesLookupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 px-6 py-12 text-slate-100">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900 dark:bg-[radial-gradient(circle_at_top,_#111827,_#020617_40%,_#020617_70%)] dark:text-slate-100">
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-8">
         <header>
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
+          <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-500">
             Client Query
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">
             Calculate tax rate by ZIP
           </h1>
-          <p className="mt-3 max-w-2xl text-sm text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
             Enter a ZIP code and a timestamp to retrieve the effective tax
             breakdown.
           </p>
@@ -118,14 +122,14 @@ export default function TaxRatesLookupPage() {
                   inputMode="numeric"
                   maxLength={5}
                   placeholder="05079"
-                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                  className={inputClass}
                 />
               </FormField>
               <FormField label="Timestamp (ISO-8601)">
                 <input
                   value={atIso}
                   onChange={(event) => setAtIso(event.target.value)}
-                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                  className={inputClass}
                 />
               </FormField>
               <FormField label="Timestamp (picker)">
@@ -138,7 +142,7 @@ export default function TaxRatesLookupPage() {
                     }
                   }}
                   type="datetime-local"
-                  className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-2 text-sm text-slate-100 focus:border-slate-600 focus:outline-none"
+                  className={inputClass}
                 />
               </FormField>
             </div>
@@ -168,14 +172,14 @@ export default function TaxRatesLookupPage() {
         {result ? (
           <section className="grid gap-6">
             <Card variant="dark">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                 Total Rate
               </p>
               <div className="mt-2 text-4xl font-semibold">
                 {formatRate(result.total_rate)}
               </div>
               <TaxRateIndicator rate={result.total_rate} className="mt-3" />
-              <div className="mt-4 grid gap-2 text-sm text-slate-300">
+              <div className="mt-4 grid gap-2 text-sm text-slate-700 dark:text-slate-300">
                 <div className="flex justify-between">
                   <span>State</span>
                   <span>{formatRate(result.breakdown.state_rate)}</span>
@@ -189,7 +193,7 @@ export default function TaxRatesLookupPage() {
                   <span>{formatRate(result.breakdown.max_city_rate)}</span>
                 </div>
                 {result.breakdown.max_city ? (
-                  <div className="flex justify-between text-xs text-slate-400">
+                  <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                     <span>City</span>
                     <span>
                       {result.breakdown.max_city.city_name} (
@@ -201,17 +205,17 @@ export default function TaxRatesLookupPage() {
             </Card>
 
             <Card variant="dark">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                 Rate details
               </h2>
-              <div className="mt-4 grid gap-4 text-sm text-slate-300">
+              <div className="mt-4 grid gap-4 text-sm text-slate-700 dark:text-slate-300">
                 {[result.state, result.county].map((row) => (
                   <div
                     key={row.id}
-                    className="rounded-xl border border-slate-800 bg-slate-950/40 p-4"
+                    className={detailCardClass}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                      <span className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-500">
                         {row.jurisdiction_type}
                       </span>
                       <span className="text-sm font-semibold">
@@ -222,21 +226,21 @@ export default function TaxRatesLookupPage() {
                       {row.state_code}
                       {row.county_name ? ` · ${row.county_name}` : ''}
                     </div>
-                    <div className="mt-1 text-xs text-slate-500">
+                    <div className="mt-1 text-xs text-slate-500 dark:text-slate-500">
                       Start {toHumanDateTime(row.start_time)}
                     </div>
                     <TaxRateIndicator rate={row.rate} compact className="mt-3" />
                   </div>
                 ))}
-                <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-                  <div className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                <div className={detailCardClass}>
+                  <div className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-500">
                     CITY
                   </div>
                   <div className="mt-3 grid gap-2">
                     {result.city.map((row) => (
                       <div key={row.id}>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-300">
+                          <span className="text-slate-700 dark:text-slate-300">
                             {row.city_name
                               ? `${row.city_name} (City ID ${row.city_id ?? '—'})`
                               : `City ID ${row.city_id ?? '—'}`}

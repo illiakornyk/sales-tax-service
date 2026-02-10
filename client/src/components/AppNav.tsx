@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { cn } from '../lib/cn';
 
 const NAV_ITEMS = [
@@ -11,19 +12,55 @@ const NAV_ITEMS = [
   { href: '/admin/tax-rates', label: 'Admin Rates' },
 ];
 
+type ThemePreference = 'system' | 'light' | 'dark';
+const THEME_STORAGE_KEY = 'theme-preference';
+
 export function AppNav() {
   const pathname = usePathname();
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
+    if (typeof window === 'undefined') {
+      return 'system';
+    }
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    return saved === 'light' || saved === 'dark' || saved === 'system'
+      ? saved
+      : 'system';
+  });
+
+  useEffect(() => {
+    applyTheme(themePreference);
+    localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+  }, [themePreference]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = () => {
+      if (themePreference === 'system') {
+        applyTheme('system');
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, [themePreference]);
+
+  const handleThemeChange = (next: ThemePreference) => {
+    setThemePreference(next);
+  };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 md:px-6">
         <Link
           href="/"
-          className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400"
+          className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-600 dark:text-slate-400"
         >
           Sales Tax Service
         </Link>
-        <ul className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <ul className="flex items-center gap-2">
           {NAV_ITEMS.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -36,8 +73,8 @@ export function AppNav() {
                   className={cn(
                     'rounded-lg px-3 py-2 text-sm font-medium transition',
                     isActive
-                      ? 'bg-slate-200 text-slate-950'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                      ? 'bg-slate-200 text-slate-950 dark:bg-slate-200 dark:text-slate-950'
+                      : 'text-slate-700 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white',
                   )}
                 >
                   {item.label}
@@ -45,8 +82,34 @@ export function AppNav() {
               </li>
             );
           })}
-        </ul>
+          </ul>
+          <label className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.12em] text-slate-600 dark:text-slate-400">
+            Theme
+            <select
+              value={themePreference}
+              onChange={(event) =>
+                handleThemeChange(event.target.value as ThemePreference)
+              }
+              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium normal-case tracking-normal text-slate-700 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:border-slate-500"
+            >
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+        </div>
       </nav>
     </header>
   );
+}
+
+function applyTheme(preference: ThemePreference) {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const resolved =
+    preference === 'system' ? (prefersDark ? 'dark' : 'light') : preference;
+
+  document.documentElement.setAttribute('data-theme', resolved);
+  document.documentElement.setAttribute('data-theme-preference', preference);
+  document.documentElement.classList.toggle('dark', resolved === 'dark');
+  document.documentElement.style.colorScheme = resolved;
 }
