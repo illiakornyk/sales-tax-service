@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Alert } from '../../../components/Alert';
 import { Card } from '../../../components/Card';
-import { FormField } from '../../../components/FormField';
+import { FormField, FormInput, FormSelect } from '../../../components/FormField';
 import { LoadingInline } from '../../../components/LoadingState';
 import { useStateCodes } from '../../../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../../../lib/api';
@@ -33,8 +33,6 @@ type ApiSuccess = {
 const MAX_RATE = 0.2;
 const MIN_RATE = 0.001;
 const MIN_YEAR = 1970;
-const controlClass =
-  'rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600';
 
 const DEFAULT_PAYLOAD: CreateTaxRatePayload = {
   jurisdictionType: 'STATE',
@@ -167,7 +165,7 @@ export function TaxRateForm() {
             <fieldset disabled={loading} className="grid gap-5">
               <div className="grid gap-4 md:grid-cols-3">
                 <FormField label="Jurisdiction">
-                  <select
+                  <FormSelect
                     value={payload.jurisdictionType}
                     onChange={(event) =>
                       updateField(
@@ -175,25 +173,23 @@ export function TaxRateForm() {
                         event.target.value as JurisdictionType,
                       )
                     }
-                    className={controlClass}
                   >
                     <option value="STATE">STATE</option>
                     <option value="COUNTY">COUNTY</option>
                     <option value="CITY">CITY</option>
-                  </select>
+                  </FormSelect>
                 </FormField>
                 <FormField
                   label="State code"
                   error={statesError}
                   errorClassName="text-rose-500 dark:text-rose-300"
                 >
-                  <select
+                  <FormSelect
                     value={payload.stateCode}
                     onChange={(event) =>
                       updateField('stateCode', event.target.value)
                     }
                     disabled={statesLoading}
-                    className={controlClass}
                   >
                     <option value="">
                       {statesLoading ? 'Loading states...' : 'Select a state'}
@@ -203,14 +199,14 @@ export function TaxRateForm() {
                         {code}
                       </option>
                     ))}
-                  </select>
+                  </FormSelect>
                 </FormField>
                 <FormField
                   label="Rate"
                   hint={`Min ${MIN_RATE * 100}%, max ${MAX_RATE * 100}%`}
                   hintClassName="text-slate-500 dark:text-slate-400"
                 >
-                  <input
+                  <FormInput
                     value={payload.rate}
                     onChange={(event) =>
                       updateField('rate', Number(event.target.value))
@@ -219,20 +215,18 @@ export function TaxRateForm() {
                     step="0.0001"
                     min={MIN_RATE}
                     max={MAX_RATE}
-                    className={controlClass}
                   />
                 </FormField>
               </div>
 
               {showCounty ? (
                 <FormField label="County name">
-                  <input
+                  <FormInput
                     value={payload.countyName ?? ''}
                     onChange={(event) =>
                       updateField('countyName', event.target.value)
                     }
                     placeholder="Orange"
-                    className={controlClass}
                   />
                 </FormField>
               ) : null}
@@ -240,24 +234,22 @@ export function TaxRateForm() {
               {showCity ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField label="City ID">
-                    <input
+                    <FormInput
                       value={payload.cityId ?? ''}
                       onChange={(event) =>
                         updateField('cityId', Number(event.target.value))
                       }
                       type="number"
                       min="1"
-                      className={controlClass}
                     />
                   </FormField>
                   <FormField label="City name (optional)">
-                    <input
+                    <FormInput
                       value={payload.cityName ?? ''}
                       onChange={(event) =>
                         updateField('cityName', event.target.value)
                       }
                       placeholder="Los Angeles"
-                      className={controlClass}
                     />
                   </FormField>
                 </div>
@@ -265,16 +257,15 @@ export function TaxRateForm() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField label="Start time (ISO-8601)">
-                  <input
+                  <FormInput
                     value={payload.startTime}
                     onChange={(event) =>
                       updateField('startTime', event.target.value)
                     }
-                    className={controlClass}
                   />
                 </FormField>
                 <FormField label="Start date & time (calendar)">
-                  <input
+                  <FormInput
                     value={localDateTimeValue}
                     onChange={(event) => {
                       const value = event.target.value;
@@ -285,15 +276,13 @@ export function TaxRateForm() {
                     type="datetime-local"
                     min={`${MIN_YEAR}-01-01T00:00`}
                     step="60"
-                    className={controlClass}
                   />
                 </FormField>
                 <FormField label="Admin API key">
-                  <input
+                  <FormInput
                     value={apiKey}
                     onChange={(event) => setApiKey(event.target.value)}
                     type="password"
-                    className={controlClass}
                   />
                 </FormField>
               </div>

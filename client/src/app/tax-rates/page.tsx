@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Alert } from '../../components/Alert';
 import { Card } from '../../components/Card';
-import { FormField } from '../../components/FormField';
+import { FormField, FormInput } from '../../components/FormField';
 import { LoadingInline } from '../../components/LoadingState';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
@@ -34,8 +34,6 @@ type ZipRateResult = {
 };
 
 const ZIP_REGEX = /^\d{5}$/;
-const inputClass =
-  'rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600';
 const detailCardClass =
   'rounded-xl border border-slate-200 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-950/40';
 
@@ -116,24 +114,22 @@ export default function TaxRatesLookupPage() {
           <form className="grid gap-5" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-3">
               <FormField label="ZIP code">
-                <input
+                <FormInput
                   value={zip}
                   onChange={(event) => setZip(event.target.value.trim())}
                   inputMode="numeric"
                   maxLength={5}
                   placeholder="05079"
-                  className={inputClass}
                 />
               </FormField>
               <FormField label="Timestamp (ISO-8601)">
-                <input
+                <FormInput
                   value={atIso}
                   onChange={(event) => setAtIso(event.target.value)}
-                  className={inputClass}
                 />
               </FormField>
               <FormField label="Timestamp (picker)">
-                <input
+                <FormInput
                   value={localDateTimeValue}
                   onChange={(event) => {
                     const next = new Date(event.target.value);
@@ -142,7 +138,6 @@ export default function TaxRatesLookupPage() {
                     }
                   }}
                   type="datetime-local"
-                  className={inputClass}
                 />
               </FormField>
             </div>

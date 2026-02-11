@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../components/Alert';
 import { Card } from '../components/Card';
-import { FormField } from '../components/FormField';
+import { FormField, FormInput, FormSelect } from '../components/FormField';
 import { LoadingInline, TableSkeletonRows } from '../components/LoadingState';
 import { useStateCodes } from '../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../lib/api';
@@ -102,11 +102,11 @@ export default function Home() {
               className="text-slate-700 dark:text-slate-300"
               hintClassName="text-slate-500 dark:text-slate-400"
             >
-              <select
+              <FormSelect
                 value={stateCode}
                 onChange={(event) => setStateCode(event.target.value)}
                 disabled={statesLoading}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600"
+                className="text-base"
               >
                 <option value="">
                   {statesLoading ? 'Loading states...' : 'Select a state'}
@@ -116,10 +116,10 @@ export default function Home() {
                     {code}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </FormField>
             <FormField label="Page size" className="text-slate-700 dark:text-slate-300">
-              <input
+              <FormInput
                 value={take}
                 onChange={(event) => {
                   const nextTake = Number(event.target.value);
@@ -131,11 +131,11 @@ export default function Home() {
                 type="number"
                 min={1}
                 max={250}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600"
+                className="text-base"
               />
             </FormField>
             <FormField label="Skip" className="text-slate-700 dark:text-slate-300">
-              <input
+              <FormInput
                 value={skip}
                 onChange={(event) => {
                   const nextSkip = Number(event.target.value);
@@ -146,7 +146,7 @@ export default function Home() {
                 type="number"
                 min={0}
                 max={100000}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-base text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:shadow-none dark:focus:border-slate-600"
+                className="text-base"
               />
             </FormField>
             <button
