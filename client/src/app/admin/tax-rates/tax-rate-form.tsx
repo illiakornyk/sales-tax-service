@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Alert } from '../../../components/Alert';
+import { Button } from '../../../components/Button';
 import { Card } from '../../../components/Card';
 import { FormField, FormInput, FormSelect } from '../../../components/FormField';
 import { LoadingInline } from '../../../components/LoadingState';
@@ -288,13 +289,14 @@ export function TaxRateForm() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <button
+                <Button
                   type="submit"
+                  variant="success"
                   disabled={loading}
-                  className="rounded-xl bg-emerald-400 px-6 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="px-6 py-2 text-sm font-semibold"
                 >
                   {loading ? 'Saving...' : 'Create rate'}
-                </button>
+                </Button>
                 <span className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
                   API {apiEndpoint} · backend {apiBase}
                 </span>

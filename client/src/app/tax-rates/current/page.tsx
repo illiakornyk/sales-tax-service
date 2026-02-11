@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../../../components/Alert';
+import { Button } from '../../../components/Button';
 import { Card } from '../../../components/Card';
 import { LoadingInline, TableSkeletonRows } from '../../../components/LoadingState';
 import { fetchJson, getApiBase } from '../../../lib/api';
@@ -80,14 +81,15 @@ export default function CurrentTaxRatesPage() {
               Shows latest active rows from tax rates per jurisdiction identity.
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={() => void loadCurrentRates()}
             disabled={loading}
-            className="h-10 rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            className="h-10 px-5 text-sm font-semibold"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
+          </Button>
         </header>
 
         {error ? (
@@ -234,8 +236,9 @@ function RatesSection({
                   ) : null}
                   {kind === 'city' ? (
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <button
+                      <Button
                         type="button"
+                        variant="primary"
                         disabled={!item.zip_codes?.length}
                         onClick={() =>
                           setZipModal({
@@ -244,10 +247,10 @@ function RatesSection({
                             zipCodes: item.zip_codes ?? [],
                           })
                         }
-                        className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="px-2 py-1 text-xs"
                       >
                         View all
-                      </button>
+                      </Button>
                     </td>
                   ) : null}
                   <td className="px-3 py-2 whitespace-nowrap">{toPercent(item.rate_percent)}</td>
@@ -270,13 +273,13 @@ function RatesSection({
                   {zipModal.cityName} (City ID: {zipModal.cityId})
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => setZipModal(null)}
-                className="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="px-3 py-1 text-sm"
               >
                 Close
-              </button>
+              </Button>
             </div>
             <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-slate-200 p-3 dark:border-slate-800">
               <div className="grid grid-cols-4 gap-2 text-sm text-slate-700 dark:text-slate-200">

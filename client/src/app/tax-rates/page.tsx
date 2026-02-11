@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Alert } from '../../components/Alert';
+import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { FormField, FormInput } from '../../components/FormField';
 import { LoadingInline } from '../../components/LoadingState';
@@ -142,13 +143,14 @@ export default function TaxRatesLookupPage() {
               </FormField>
             </div>
             <div className="grid gap-4 md:grid-cols-1 md:items-end">
-              <button
+              <Button
                 type="submit"
+                variant="primary"
                 disabled={loading}
-                className="h-10 rounded-xl bg-indigo-400 px-6 text-sm font-semibold text-indigo-950 transition hover:bg-indigo-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-10 px-6 text-sm font-semibold"
               >
                 {loading ? 'Calculating...' : 'Calculate'}
-              </button>
+              </Button>
             </div>
           </form>
 

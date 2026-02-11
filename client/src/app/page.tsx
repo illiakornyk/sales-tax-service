@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Alert } from '../components/Alert';
+import { Button, ButtonGroup } from '../components/Button';
 import { Card } from '../components/Card';
 import { FormField, FormInput, FormSelect } from '../components/FormField';
 import { LoadingInline, TableSkeletonRows } from '../components/LoadingState';
@@ -201,13 +202,15 @@ export default function Home() {
                 className="text-base"
               />
             </FormField>
-            <button
+            <Button
+              type="button"
+              variant="primary"
               onClick={applyDraftFilters}
               disabled={!hasPendingFilterChanges || loading}
-              className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+              className="h-11 px-6 text-sm font-semibold uppercase tracking-wide"
             >
               {loading ? 'Loading...' : 'Reload'}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600 dark:text-slate-300">
@@ -247,22 +250,26 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-            <div className="flex items-center gap-2">
-              <button
+            <ButtonGroup>
+              <Button
+                type="button"
+                position="left"
                 onClick={goToPrevPage}
                 disabled={!hasPrev || loading || hasPendingFilterChanges}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
+                className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
               >
                 Prev
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
+                position="right"
                 onClick={goToNextPage}
                 disabled={!hasNext || loading || hasPendingFilterChanges}
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
+                className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
               >
                 Next
-              </button>
-            </div>
+              </Button>
+            </ButtonGroup>
             <span className="text-xs uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
               offset {appliedFilters.skip} · limit {appliedFilters.take}
             </span>
