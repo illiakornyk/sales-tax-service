@@ -268,30 +268,35 @@ export default function Home() {
             </span>
           </div>
           <div className="max-h-[540px] overflow-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="sticky top-0 bg-white text-xs uppercase tracking-[0.18em] text-slate-400 dark:bg-slate-900 dark:text-slate-500">
-                <tr>
-                  <th className="px-6 py-3">ZIP</th>
-                  <th className="px-6 py-3">State</th>
-                  <th className="px-6 py-3">County</th>
-                  <th className="px-6 py-3">Primary City</th>
+            <table className="min-w-full divide-y-2 divide-gray-200 text-sm dark:divide-gray-700">
+              <thead className="sticky top-0 bg-white ltr:text-left rtl:text-right dark:bg-slate-900">
+                <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
+                  <th className="px-3 py-2 whitespace-nowrap">ZIP</th>
+                  <th className="px-3 py-2 whitespace-nowrap">State</th>
+                  <th className="px-3 py-2 whitespace-nowrap">County</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Primary City</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {loading ? (
-                  <TableSkeletonRows columns={4} rows={8} tone="light" />
+                  <TableSkeletonRows
+                    columns={4}
+                    rows={8}
+                    tone="light"
+                    cellClassName="px-3 py-2 whitespace-nowrap"
+                  />
                 ) : (
                   rows.map((row) => (
                     <tr
                       key={row.zip}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      className="*:text-gray-900 *:first:font-medium hover:bg-gray-50 dark:*:text-white dark:hover:bg-gray-800/50"
                     >
-                      <td className="px-6 py-3 font-semibold text-slate-900 dark:text-slate-100">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         {row.zip}
                       </td>
-                      <td className="px-6 py-3">{row.state_code}</td>
-                      <td className="px-6 py-3">{row.county_name ?? '—'}</td>
-                      <td className="px-6 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">{row.state_code}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">{row.county_name ?? '—'}</td>
+                      <td className="px-3 py-2 whitespace-nowrap">
                         {row.primary_city_name ?? '—'}
                       </td>
                     </tr>
@@ -301,7 +306,7 @@ export default function Home() {
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-6 py-8 text-center text-sm text-slate-500 dark:text-slate-400"
+                      className="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
                     >
                       No data found for this state.
                     </td>

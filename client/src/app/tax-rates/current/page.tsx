@@ -124,20 +124,20 @@ export default function CurrentTaxRatesPage() {
         {loading && !data ? (
           <Card variant="light">
             <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-            <table className="w-full table-fixed text-left text-sm">
-              <thead className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                <tr>
-                  <th className="px-3 py-2">State</th>
-                  <th className="px-3 py-2">Rate (%)</th>
-                  <th className="px-3 py-2">Start Time</th>
+            <table className="min-w-full divide-y-2 divide-gray-200 text-sm dark:divide-gray-700">
+              <thead className="ltr:text-left rtl:text-right">
+                <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
+                  <th className="px-3 py-2 whitespace-nowrap">State</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Rate (%)</th>
+                  <th className="px-3 py-2 whitespace-nowrap">Start Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 <TableSkeletonRows
                   columns={3}
                   rows={4}
                   tone="light"
-                  cellClassName="px-3 py-2"
+                  cellClassName="px-3 py-2 whitespace-nowrap"
                 />
               </tbody>
             </table>
@@ -184,53 +184,56 @@ function RatesSection({
         </p>
       ) : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full table-fixed text-left text-sm">
-            <thead className="text-xs uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-              <tr>
-                <th className="px-3 py-2">State</th>
+          <table className="min-w-full divide-y-2 divide-gray-200 text-sm dark:divide-gray-700">
+            <thead className="ltr:text-left rtl:text-right">
+              <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
+                <th className="px-3 py-2 whitespace-nowrap">State</th>
                 {kind === 'county' ? (
-                  <th className="px-3 py-2">County</th>
+                  <th className="px-3 py-2 whitespace-nowrap">County</th>
                 ) : null}
-                {kind === 'city' ? <th className="px-3 py-2">City ID</th> : null}
+                {kind === 'city' ? <th className="px-3 py-2 whitespace-nowrap">City ID</th> : null}
                 {kind === 'city' ? (
-                  <th className="px-3 py-2">City Name</th>
-                ) : null}
-                {kind === 'city' ? (
-                  <th className="px-3 py-2">ZIP Count</th>
+                  <th className="px-3 py-2 whitespace-nowrap">City Name</th>
                 ) : null}
                 {kind === 'city' ? (
-                  <th className="px-3 py-2">ZIP Preview</th>
+                  <th className="px-3 py-2 whitespace-nowrap">ZIP Count</th>
                 ) : null}
                 {kind === 'city' ? (
-                  <th className="px-3 py-2">ZIP List</th>
+                  <th className="px-3 py-2 whitespace-nowrap">ZIP Preview</th>
                 ) : null}
-                <th className="px-3 py-2">Rate (%)</th>
-                <th className="px-3 py-2">Start Time</th>
+                {kind === 'city' ? (
+                  <th className="px-3 py-2 whitespace-nowrap">ZIP List</th>
+                ) : null}
+                <th className="px-3 py-2 whitespace-nowrap">Rate (%)</th>
+                <th className="px-3 py-2 whitespace-nowrap">Start Time</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-700 dark:divide-slate-800 dark:text-slate-300">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {items.map((item) => (
-                <tr key={getRowKey(item)}>
-                  <td className="px-3 py-2">{item.state_code}</td>
+                <tr
+                  key={getRowKey(item)}
+                  className="*:text-gray-900 *:first:font-medium dark:*:text-white"
+                >
+                  <td className="px-3 py-2 whitespace-nowrap">{item.state_code}</td>
                   {kind === 'county' ? (
-                    <td className="px-3 py-2">{item.county_name ?? '—'}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{item.county_name ?? '—'}</td>
                   ) : null}
                   {kind === 'city' ? (
-                    <td className="px-3 py-2">{item.city_id ?? '—'}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{item.city_id ?? '—'}</td>
                   ) : null}
                   {kind === 'city' ? (
-                    <td className="px-3 py-2">{item.city_name ?? '—'}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{item.city_name ?? '—'}</td>
                   ) : null}
                   {kind === 'city' ? (
-                    <td className="px-3 py-2">{item.zip_codes?.length ?? 0}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{item.zip_codes?.length ?? 0}</td>
                   ) : null}
                   {kind === 'city' ? (
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       {formatZipPreview(item.zip_codes ?? [])}
                     </td>
                   ) : null}
                   {kind === 'city' ? (
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <button
                         type="button"
                         disabled={!item.zip_codes?.length}
@@ -247,8 +250,8 @@ function RatesSection({
                       </button>
                     </td>
                   ) : null}
-                  <td className="px-3 py-2">{toPercent(item.rate_percent)}</td>
-                  <td className="px-3 py-2">{toHumanDateTime(item.start_time)}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{toPercent(item.rate_percent)}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{toHumanDateTime(item.start_time)}</td>
                 </tr>
               ))}
             </tbody>
