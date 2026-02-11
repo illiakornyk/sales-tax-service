@@ -15,14 +15,27 @@ type ZipSummary = {
   primary_city_name: string | null;
 };
 
+type GeographyFilters = {
+  stateCode: string;
+  skip: number;
+  take: number;
+};
+
 const DEFAULT_STATE = 'CA';
 const DEFAULT_SKIP = 0;
 const DEFAULT_TAKE = 50;
 
 export default function Home() {
-  const [stateCode, setStateCode] = useState(DEFAULT_STATE);
-  const [skip, setSkip] = useState(DEFAULT_SKIP);
-  const [take, setTake] = useState(DEFAULT_TAKE);
+  const [draftFilters, setDraftFilters] = useState<GeographyFilters>({
+    stateCode: DEFAULT_STATE,
+    skip: DEFAULT_SKIP,
+    take: DEFAULT_TAKE,
+  });
+  const [appliedFilters, setAppliedFilters] = useState<GeographyFilters>({
+    stateCode: DEFAULT_STATE,
+    skip: DEFAULT_SKIP,
+    take: DEFAULT_TAKE,
+  });
   const [rows, setRows] = useState<ZipSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,10 +43,18 @@ export default function Home() {
 
   const apiBase = getApiBase();
 
-  const normalizedStateCode = stateCode.trim().toUpperCase();
+  const normalizedDraftStateCode = draftFilters.stateCode.trim().toUpperCase();
+  const normalizedAppliedStateCode = appliedFilters.stateCode
+    .trim()
+    .toUpperCase();
+
+  const hasPendingFilterChanges =
+    normalizedDraftStateCode !== normalizedAppliedStateCode ||
+    draftFilters.skip !== appliedFilters.skip ||
+    draftFilters.take !== appliedFilters.take;
 
   const fetchRows = useCallback(async () => {
-    if (!normalizedStateCode) {
+    if (!normalizedAppliedStateCode) {
       setError('State code is required.');
       setRows([]);
       return;
@@ -42,9 +63,12 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const url = new URL(`/geography/state/${normalizedStateCode}`, apiBase);
-      url.searchParams.set('skip', String(skip));
-      url.searchParams.set('take', String(take));
+      const url = new URL(
+        `/geography/state/${normalizedAppliedStateCode}`,
+        apiBase,
+      );
+      url.searchParams.set('skip', String(appliedFilters.skip));
+      url.searchParams.set('take', String(appliedFilters.take));
 
       const response = await fetchJson<ZipSummary[]>(url, {
         cache: 'no-store',
@@ -64,15 +88,35 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [apiBase, normalizedStateCode, skip, take]);
+  }, [apiBase, normalizedAppliedStateCode, appliedFilters.skip, appliedFilters.take]);
 
   useEffect(() => {
     void fetchRows();
   }, [fetchRows]);
 
-  const currentPage = Math.floor(skip / take) + 1;
-  const hasPrev = skip > 0;
-  const hasNext = rows.length === take;
+  const currentPage = Math.floor(appliedFilters.skip / appliedFilters.take) + 1;
+  const hasPrev = appliedFilters.skip > 0;
+  const hasNext = rows.length === appliedFilters.take;
+
+  const applyDraftFilters = () => {
+    setAppliedFilters({
+      stateCode: normalizedDraftStateCode,
+      skip: draftFilters.skip,
+      take: draftFilters.take,
+    });
+  };
+
+  const goToPrevPage = () => {
+    const nextSkip = Math.max(appliedFilters.skip - appliedFilters.take, 0);
+    setDraftFilters((prev) => ({ ...prev, skip: nextSkip }));
+    setAppliedFilters((prev) => ({ ...prev, skip: nextSkip }));
+  };
+
+  const goToNextPage = () => {
+    const nextSkip = appliedFilters.skip + appliedFilters.take;
+    setDraftFilters((prev) => ({ ...prev, skip: nextSkip }));
+    setAppliedFilters((prev) => ({ ...prev, skip: nextSkip }));
+  };
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900 dark:bg-[radial-gradient(circle_at_top,_#111827,_#020617_40%,_#020617_70%)] dark:text-slate-100">
@@ -103,8 +147,13 @@ export default function Home() {
               hintClassName="text-slate-500 dark:text-slate-400"
             >
               <FormSelect
-                value={stateCode}
-                onChange={(event) => setStateCode(event.target.value)}
+                value={draftFilters.stateCode}
+                onChange={(event) =>
+                  setDraftFilters((prev) => ({
+                    ...prev,
+                    stateCode: event.target.value,
+                  }))
+                }
                 disabled={statesLoading}
                 className="text-base"
               >
@@ -120,12 +169,15 @@ export default function Home() {
             </FormField>
             <FormField label="Page size" className="text-slate-700 dark:text-slate-300">
               <FormInput
-                value={take}
+                value={draftFilters.take}
                 onChange={(event) => {
                   const nextTake = Number(event.target.value);
                   if (Number.isFinite(nextTake) && nextTake > 0) {
-                    setTake(nextTake);
-                    setSkip(0);
+                    setDraftFilters((prev) => ({
+                      ...prev,
+                      take: nextTake,
+                      skip: 0,
+                    }));
                   }
                 }}
                 type="number"
@@ -136,11 +188,11 @@ export default function Home() {
             </FormField>
             <FormField label="Skip" className="text-slate-700 dark:text-slate-300">
               <FormInput
-                value={skip}
+                value={draftFilters.skip}
                 onChange={(event) => {
                   const nextSkip = Number(event.target.value);
                   if (Number.isFinite(nextSkip) && nextSkip >= 0) {
-                    setSkip(nextSkip);
+                    setDraftFilters((prev) => ({ ...prev, skip: nextSkip }));
                   }
                 }}
                 type="number"
@@ -150,8 +202,9 @@ export default function Home() {
               />
             </FormField>
             <button
-              onClick={fetchRows}
-              className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+              onClick={applyDraftFilters}
+              disabled={!hasPendingFilterChanges || loading}
+              className="h-11 rounded-xl bg-slate-900 px-6 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
             >
               {loading ? 'Loading...' : 'Reload'}
             </button>
@@ -196,22 +249,22 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setSkip(Math.max(skip - take, 0))}
-                disabled={!hasPrev || loading}
+                onClick={goToPrevPage}
+                disabled={!hasPrev || loading || hasPendingFilterChanges}
                 className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
               >
                 Prev
               </button>
               <button
-                onClick={() => setSkip(skip + take)}
-                disabled={!hasNext || loading}
+                onClick={goToNextPage}
+                disabled={!hasNext || loading || hasPendingFilterChanges}
                 className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
               >
                 Next
               </button>
             </div>
             <span className="text-xs uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
-              offset {skip} · limit {take}
+              offset {appliedFilters.skip} · limit {appliedFilters.take}
             </span>
           </div>
           <div className="max-h-[540px] overflow-auto">
