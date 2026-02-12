@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Sales Tax Service",
   description: "Sales tax lookup and admin management",
+  icons: {
+    icon: "/app_logo.svg",
+    shortcut: "/app_logo.svg",
+    apple: "/app_logo.svg",
+  },
 };
 
 const themeInitScript = `
