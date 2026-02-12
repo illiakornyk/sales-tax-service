@@ -20,18 +20,12 @@ export function AppNav() {
   const pathname = usePathname();
   const swaggerHref = `${getApiBase()}/api`;
   const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
-    if (typeof window === 'undefined') {
-      return 'system';
-    }
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    return saved === 'light' || saved === 'dark' || saved === 'system'
-      ? saved
-      : 'system';
+    return readThemePreference();
   });
 
   useEffect(() => {
     applyTheme(themePreference);
-    localStorage.setItem(THEME_STORAGE_KEY, themePreference);
+    writeThemePreference(themePreference);
   }, [themePreference]);
 
   useEffect(() => {
@@ -49,6 +43,8 @@ export function AppNav() {
   }, [themePreference]);
 
   const handleThemeChange = (next: ThemePreference) => {
+    applyTheme(next);
+    writeThemePreference(next);
     setThemePreference(next);
   };
 
@@ -123,4 +119,29 @@ function applyTheme(preference: ThemePreference) {
   document.documentElement.setAttribute('data-theme-preference', preference);
   document.documentElement.classList.toggle('dark', resolved === 'dark');
   document.documentElement.style.colorScheme = resolved;
+}
+
+function readThemePreference(): ThemePreference {
+  if (typeof window === 'undefined') {
+    return 'system';
+  }
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    return saved === 'light' || saved === 'dark' || saved === 'system'
+      ? saved
+      : 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+function writeThemePreference(preference: ThemePreference): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, preference);
+  } catch {
+    // Ignore storage write failures (private mode / restricted policies).
+  }
 }
