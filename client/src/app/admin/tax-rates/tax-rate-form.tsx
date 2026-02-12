@@ -337,20 +337,25 @@ export function TaxRateForm() {
                     ];
 
                     return (
-                      <dl className="mt-2 grid gap-2 text-sm text-emerald-700 dark:text-emerald-100">
-                        {fields.map(({ label, value }) => (
-                          <div key={label} className="flex justify-between gap-4">
-                            <dt className="text-emerald-700/70 dark:text-emerald-200/70">
-                              {label}
-                            </dt>
-                            <dd className="text-right font-medium">
-                              {value === null || value === undefined
-                                ? '—'
-                                : String(value)}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
+                      <div className="mt-2 flow-root">
+                        <dl className="-my-3 divide-y divide-gray-200 text-sm dark:divide-gray-700">
+                          {fields.map(({ label, value }) => (
+                            <div
+                              key={label}
+                              className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4"
+                            >
+                              <dt className="font-medium text-gray-900 dark:text-white">
+                                {label}
+                              </dt>
+                              <dd className="text-gray-700 sm:col-span-2 dark:text-gray-200">
+                                {value === null || value === undefined
+                                  ? '—'
+                                  : String(value)}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </div>
                     );
                   })()
                 ) : (
