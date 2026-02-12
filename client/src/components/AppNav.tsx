@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Geography' },
   { href: '/tax-rates', label: 'Tax Lookup' },
   { href: '/tax-rates/current', label: 'Current Rates' },
+  { href: '/faq', label: 'FAQ' },
   { href: '/admin/tax-rates', label: 'Admin Rates' },
 ] as const;
 
