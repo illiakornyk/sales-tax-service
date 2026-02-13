@@ -8,8 +8,10 @@ import { GeographyService } from '../geography/geography.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, tax_rates } from '../generated/prisma/client';
 import { CreateTaxRateDto, JurisdictionType } from './dto/create-tax-rate.dto';
+import { GetCurrentTaxRatesQueryDto } from './dto/get-current-tax-rates.dto';
 import {
   CurrentTaxRateItem,
+  CurrentTaxRateSectionPagination,
   CurrentTaxRatesResponse,
   EffectiveRates,
   NormalizedCreateDto,
@@ -21,6 +23,11 @@ import {
 type TaxRateWithCity = Prisma.tax_ratesGetPayload<{
   include: { cities: { select: { city_name: true } } };
 }>;
+
+type CurrentSectionPageResult = {
+  items: CurrentTaxRateItem[];
+  pagination: CurrentTaxRateSectionPagination;
+};
 
 @Injectable()
 export class TaxRatesService {
@@ -98,7 +105,9 @@ export class TaxRatesService {
     );
   }
 
-  async getCurrentActiveRates(): Promise<CurrentTaxRatesResponse> {
+  async getCurrentActiveRates(
+    query: GetCurrentTaxRatesQueryDto,
+  ): Promise<CurrentTaxRatesResponse> {
     const now = new Date();
     const rates = await this.prisma.tax_rates.findMany({
       where: { start_time: { lte: now } },
@@ -113,9 +122,9 @@ export class TaxRatesService {
     const cityZipCodesById = await this.getCityZipCodesMap(rates);
 
     const seen = new Set<string>();
-    const state: CurrentTaxRateItem[] = [];
-    const county: CurrentTaxRateItem[] = [];
-    const city: CurrentTaxRateItem[] = [];
+    const stateItems: CurrentTaxRateItem[] = [];
+    const countyItems: CurrentTaxRateItem[] = [];
+    const cityItems: CurrentTaxRateItem[] = [];
 
     for (const rate of rates) {
       const key = this.getCurrentRateIdentityKey(rate);
@@ -126,19 +135,40 @@ export class TaxRatesService {
 
       const item = this.toCurrentTaxRateItem(rate, cityZipCodesById);
       if (rate.jurisdiction_type === JurisdictionType.STATE) {
-        state.push(item);
+        stateItems.push(item);
       } else if (rate.jurisdiction_type === JurisdictionType.COUNTY) {
-        county.push(item);
+        countyItems.push(item);
       } else {
-        city.push(item);
+        cityItems.push(item);
       }
     }
 
+    const statePage = this.paginateCurrentSection(stateItems, {
+      include: query.includeState ?? true,
+      skip: query.stateSkip ?? 0,
+      take: query.stateTake,
+    });
+    const countyPage = this.paginateCurrentSection(countyItems, {
+      include: query.includeCounty ?? true,
+      skip: query.countySkip ?? 0,
+      take: query.countyTake,
+    });
+    const cityPage = this.paginateCurrentSection(cityItems, {
+      include: query.includeCity ?? true,
+      skip: query.citySkip ?? 0,
+      take: query.cityTake,
+    });
+
     return {
       as_of: now.toISOString(),
-      state,
-      county,
-      city,
+      state: statePage.items,
+      county: countyPage.items,
+      city: cityPage.items,
+      pagination: {
+        state: statePage.pagination,
+        county: countyPage.pagination,
+        city: cityPage.pagination,
+      },
     };
   }
 
@@ -443,7 +473,9 @@ export class TaxRatesService {
       city: cityRates.map((rate) =>
         this.toTaxRateResponse(
           rate,
-          rate.city_id !== null ? (cityNameById.get(rate.city_id) ?? null) : null,
+          rate.city_id !== null
+            ? (cityNameById.get(rate.city_id) ?? null)
+            : null,
         ),
       ),
       total_rate: totalRate,
@@ -529,6 +561,61 @@ export class TaxRatesService {
     }
 
     return base;
+  }
+
+  private paginateCurrentSection(
+    items: CurrentTaxRateItem[],
+    options: {
+      include: boolean;
+      skip: number;
+      take?: number;
+    },
+  ): CurrentSectionPageResult {
+    if (!options.include) {
+      return {
+        items: [],
+        pagination: {
+          included: false,
+          enabled: false,
+          total: 0,
+          skip: 0,
+          take: null,
+          has_more: false,
+        },
+      };
+    }
+
+    const total = items.length;
+    const skip = Math.max(0, options.skip);
+
+    if (options.take === undefined) {
+      return {
+        items,
+        pagination: {
+          included: true,
+          enabled: false,
+          total,
+          skip: 0,
+          take: null,
+          has_more: false,
+        },
+      };
+    }
+
+    const take = Math.max(1, options.take);
+    const pagedItems = items.slice(skip, skip + take);
+
+    return {
+      items: pagedItems,
+      pagination: {
+        included: true,
+        enabled: true,
+        total,
+        skip,
+        take,
+        has_more: skip + pagedItems.length < total,
+      },
+    };
   }
 
   private formatTimestamp(at: Date): string {

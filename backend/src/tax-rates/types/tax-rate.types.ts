@@ -58,9 +58,23 @@ export type CurrentTaxRateItem = {
   start_time: string;
 };
 
+export type CurrentTaxRateSectionPagination = {
+  included: boolean;
+  enabled: boolean;
+  total: number;
+  skip: number;
+  take: number | null;
+  has_more: boolean;
+};
+
 export type CurrentTaxRatesResponse = {
   as_of: string;
   state: CurrentTaxRateItem[];
   county: CurrentTaxRateItem[];
   city: CurrentTaxRateItem[];
+  pagination: {
+    state: CurrentTaxRateSectionPagination;
+    county: CurrentTaxRateSectionPagination;
+    city: CurrentTaxRateSectionPagination;
+  };
 };

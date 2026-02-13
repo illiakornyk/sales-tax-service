@@ -12,6 +12,7 @@ import { AdminOnlyGuard } from '../auth/admin-only.guard';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 import { ZipCodePipe } from '../common/pipes/zip-code.pipe';
 import { CreateTaxRateDto } from './dto/create-tax-rate.dto';
+import { GetCurrentTaxRatesQueryDto } from './dto/get-current-tax-rates.dto';
 import { GetRatesByZipQueryDto } from './dto/get-rates-by-zip.dto';
 import { TaxRatesService } from './tax-rates.service';
 
@@ -24,8 +25,8 @@ export class TaxRatesController {
   @ApiOperation({
     summary: 'Get currently effective tax rates grouped by jurisdiction',
   })
-  async getCurrentActiveRates() {
-    return this.taxRatesService.getCurrentActiveRates();
+  async getCurrentActiveRates(@Query() query: GetCurrentTaxRatesQueryDto) {
+    return this.taxRatesService.getCurrentActiveRates(query);
   }
 
   @Get('zip/:zip')
