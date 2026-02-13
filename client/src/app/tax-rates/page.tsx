@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { FormField, FormInput } from '../../components/FormField';
 import { LoadingInline } from '../../components/LoadingState';
+import { PageShell } from '../../components/PageShell';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
 import { formatRate } from '../../lib/format';
@@ -96,8 +97,7 @@ export default function TaxRatesLookupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900 dark:bg-[radial-gradient(circle_at_top,_#111827,_#020617_40%,_#020617_70%)] dark:text-slate-100">
-      <main className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+    <PageShell mainClassName="max-w-4xl">
         <header>
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-500">
             Client Query
@@ -255,8 +255,7 @@ export default function TaxRatesLookupPage() {
             </Card>
           </section>
         ) : null}
-      </main>
-    </div>
+    </PageShell>
   );
 }
 

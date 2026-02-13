@@ -6,6 +6,7 @@ import { Button, ButtonGroup } from '../components/Button';
 import { Card } from '../components/Card';
 import { FormField, FormInput, FormSelect } from '../components/FormField';
 import { LoadingInline, TableSkeletonRows } from '../components/LoadingState';
+import { PageShell } from '../components/PageShell';
 import { useStateCodes } from '../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../lib/api';
 
@@ -120,8 +121,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7f4ff,_#eef2ff_35%,_#f8fafc_70%)] px-6 py-12 text-slate-900 dark:bg-[radial-gradient(circle_at_top,_#111827,_#020617_40%,_#020617_70%)] dark:text-slate-100">
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 font-sans">
+    <PageShell mainClassName="max-w-5xl font-sans">
         <header className="flex flex-col gap-3">
           <p className="text-sm uppercase tracking-[0.4em] text-slate-500 dark:text-slate-400">
             Geography Explorer
@@ -323,7 +323,6 @@ export default function Home() {
             </table>
           </div>
         </Card>
-      </main>
-    </div>
+    </PageShell>
   );
 }
