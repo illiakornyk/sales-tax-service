@@ -9,7 +9,7 @@ import { LoadingInline } from '../../components/LoadingState';
 import { PageShell } from '../../components/PageShell';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
-import { formatRate } from '../../lib/format';
+import { formatDateTime, formatRate } from '../../lib/format';
 
 type RateRow = {
   id: string;
@@ -224,7 +224,7 @@ export default function TaxRatesLookupPage() {
                       {row.county_name ? ` · ${row.county_name}` : ''}
                     </div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-500">
-                      Start {toHumanDateTime(row.start_time)}
+                      Start {formatDateTime(row.start_time)}
                     </div>
                     <TaxRateIndicator rate={row.rate} compact className="mt-3" />
                   </div>
@@ -257,18 +257,4 @@ export default function TaxRatesLookupPage() {
         ) : null}
     </PageShell>
   );
-}
-
-function toHumanDateTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }

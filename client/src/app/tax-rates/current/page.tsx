@@ -12,6 +12,7 @@ import {
 } from '../../../components/LoadingState';
 import { PageShell } from '../../../components/PageShell';
 import { fetchJson, getApiBase } from '../../../lib/api';
+import { formatDateTime } from '../../../lib/format';
 import type {
   CurrentTaxRateItem,
   CurrentTaxRateSectionPagination,
@@ -142,7 +143,7 @@ export default function CurrentTaxRatesPage() {
             <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-300 md:grid-cols-4">
               <div>
                 <span className="text-slate-500">As of</span>
-                <p className="font-medium">{toHumanDateTime(data.as_of)}</p>
+                <p className="font-medium">{formatDateTime(data.as_of)}</p>
               </div>
               <div>
                 <span className="text-slate-500">State rates</span>
@@ -223,18 +224,4 @@ export default function CurrentTaxRatesPage() {
       ) : null}
     </PageShell>
   );
-}
-
-function toHumanDateTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }

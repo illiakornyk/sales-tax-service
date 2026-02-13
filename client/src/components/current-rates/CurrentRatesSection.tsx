@@ -1,5 +1,6 @@
 import { Button } from '../Button';
 import { Card } from '../Card';
+import { formatDateTime } from '../../lib/format';
 import { SectionPagination } from './SectionPagination';
 import type {
   CurrentTaxRateItem,
@@ -126,7 +127,7 @@ export function CurrentRatesSection({
                       {toPercent(item.rate_percent)}
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      {toHumanDateTime(item.start_time)}
+                      {formatDateTime(item.start_time)}
                     </td>
                   </tr>
                 ))}
@@ -162,20 +163,6 @@ function toPercent(value: string): string {
     return value;
   }
   return `${numeric}%`;
-}
-
-function toHumanDateTime(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 function formatZipPreview(zipCodes: string[]): string {
