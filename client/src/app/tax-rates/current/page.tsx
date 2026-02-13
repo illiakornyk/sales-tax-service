@@ -47,11 +47,17 @@ type CurrentTaxRatesResponse = {
 type RatesSectionKind = 'state' | 'county' | 'city';
 type PaginationDirection = 'prev' | 'next';
 type SectionSkips = Record<RatesSectionKind, number>;
+type ZipModalState = {
+  cityId: string;
+  cityName: string;
+  zipCodes: string[];
+};
 
 export default function CurrentTaxRatesPage() {
   const [data, setData] = useState<CurrentTaxRatesResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [zipModal, setZipModal] = useState<ZipModalState | null>(null);
   const [sectionSkips, setSectionSkips] = useState<SectionSkips>({
     state: 0,
     county: 0,
@@ -96,6 +102,27 @@ export default function CurrentTaxRatesPage() {
   useEffect(() => {
     void loadCurrentRates();
   }, [loadCurrentRates]);
+
+  useEffect(() => {
+    if (!zipModal) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setZipModal(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [zipModal]);
 
   const handleSectionPagination = (
     kind: RatesSectionKind,
@@ -204,6 +231,7 @@ export default function CurrentTaxRatesPage() {
             pagination={data?.pagination.state}
             loading={loading}
             onPageChange={handleSectionPagination}
+            onOpenZipModal={setZipModal}
           />
           <RatesSection
             kind="county"
@@ -212,6 +240,7 @@ export default function CurrentTaxRatesPage() {
             pagination={data?.pagination.county}
             loading={loading}
             onPageChange={handleSectionPagination}
+            onOpenZipModal={setZipModal}
           />
           <RatesSection
             kind="city"
@@ -220,9 +249,73 @@ export default function CurrentTaxRatesPage() {
             pagination={data?.pagination.city}
             loading={loading}
             onPageChange={handleSectionPagination}
+            onOpenZipModal={setZipModal}
           />
         </div>
       </main>
+      {zipModal ? (
+        <div
+          className="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="zipModalTitle"
+          onClick={() => setZipModal(null)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <h2
+                id="zipModalTitle"
+                className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white"
+              >
+                ZIP Codes
+              </h2>
+
+              <button
+                type="button"
+                className="-me-4 -mt-4 rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 focus:outline-none dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                aria-label="Close"
+                onClick={() => setZipModal(null)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-pretty text-gray-700 dark:text-gray-200">
+                {zipModal.cityName} (City ID: {zipModal.cityId})
+              </p>
+              <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                <div className="grid grid-cols-4 gap-2 text-sm text-gray-700 dark:text-gray-200">
+                  {zipModal.zipCodes.map((zip) => (
+                    <span
+                      key={zip}
+                      className="rounded border border-gray-300 bg-gray-50 px-2 py-1 text-center dark:border-gray-600 dark:bg-gray-800"
+                    >
+                      {zip}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -234,6 +327,7 @@ function RatesSection({
   pagination,
   loading,
   onPageChange,
+  onOpenZipModal,
 }: {
   kind: RatesSectionKind;
   title: string;
@@ -244,13 +338,8 @@ function RatesSection({
     kind: RatesSectionKind,
     direction: PaginationDirection,
   ) => void;
+  onOpenZipModal: (value: ZipModalState) => void;
 }) {
-  const [zipModal, setZipModal] = useState<{
-    cityId: string;
-    cityName: string;
-    zipCodes: string[];
-  } | null>(null);
-
   return (
     <Card variant="light">
       <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
@@ -327,13 +416,13 @@ function RatesSection({
                       <td className="px-3 py-2 whitespace-nowrap">
                         <Button
                           type="button"
-                          variant="primary"
-                          disabled={!item.zip_codes?.length}
-                          onClick={() =>
-                            setZipModal({
-                              cityId: item.city_id ?? '—',
-                              cityName: item.city_name ?? '—',
-                              zipCodes: item.zip_codes ?? [],
+                        variant="primary"
+                        disabled={!item.zip_codes?.length}
+                        onClick={() =>
+                          onOpenZipModal({
+                            cityId: item.city_id ?? '—',
+                            cityName: item.city_name ?? '—',
+                            zipCodes: item.zip_codes ?? [],
                             })
                           }
                           className="px-2 py-1 text-xs"
@@ -363,41 +452,6 @@ function RatesSection({
           ) : null}
         </div>
       )}
-      {zipModal ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/70 p-4">
-          <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  ZIP Codes
-                </h3>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                  {zipModal.cityName} (City ID: {zipModal.cityId})
-                </p>
-              </div>
-              <Button
-                type="button"
-                onClick={() => setZipModal(null)}
-                className="px-3 py-1 text-sm"
-              >
-                Close
-              </Button>
-            </div>
-            <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-slate-200 p-3 dark:border-slate-800">
-              <div className="grid grid-cols-4 gap-2 text-sm text-slate-700 dark:text-slate-200">
-                {zipModal.zipCodes.map((zip) => (
-                  <span
-                    key={zip}
-                    className="rounded border border-slate-300 bg-slate-50 px-2 py-1 text-center dark:border-slate-700 dark:bg-slate-950"
-                  >
-                    {zip}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </Card>
   );
 }
