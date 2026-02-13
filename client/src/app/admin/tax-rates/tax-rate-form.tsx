@@ -7,6 +7,7 @@ import { Card } from '../../../components/Card';
 import { FormField, FormInput, FormSelect } from '../../../components/FormField';
 import { LoadingInline } from '../../../components/LoadingState';
 import { PageShell } from '../../../components/PageShell';
+import { ResponseDetails } from '../../../components/ResponseDetails';
 import { useStateCodes } from '../../../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../../../lib/api';
 
@@ -144,6 +145,23 @@ export function TaxRateForm() {
       updateField('startTime', local.toISOString());
     }
   };
+
+  const successData =
+    success?.data && typeof success.data === 'object'
+      ? (success.data as Record<string, unknown>)
+      : null;
+
+  const successFields = successData
+    ? [
+        { label: 'ID', value: successData.id },
+        { label: 'Jurisdiction', value: successData.jurisdiction_type },
+        { label: 'State', value: successData.state_code },
+        { label: 'County', value: successData.county_name },
+        { label: 'City ID', value: successData.city_id },
+        { label: 'Rate', value: successData.rate },
+        { label: 'Start Time', value: successData.start_time },
+      ]
+    : [];
 
   return (
     <PageShell mainClassName="max-w-4xl">
@@ -323,41 +341,8 @@ export function TaxRateForm() {
           {success ? (
             <div className="mt-4">
               <Alert variant="success" title={`Success ${success.status}`}>
-                {success.data && typeof success.data === 'object' ? (
-                  (() => {
-                    const successData = success.data as Record<string, unknown>;
-                    const fields: Array<{ label: string; value: unknown }> = [
-                      { label: 'ID', value: successData.id },
-                      { label: 'Jurisdiction', value: successData.jurisdiction_type },
-                      { label: 'State', value: successData.state_code },
-                      { label: 'County', value: successData.county_name },
-                      { label: 'City ID', value: successData.city_id },
-                      { label: 'Rate', value: successData.rate },
-                      { label: 'Start Time', value: successData.start_time },
-                    ];
-
-                    return (
-                      <div className="mt-2 flow-root">
-                        <dl className="-my-3 divide-y divide-gray-200 text-sm dark:divide-gray-700">
-                          {fields.map(({ label, value }) => (
-                            <div
-                              key={label}
-                              className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4"
-                            >
-                              <dt className="font-medium text-gray-900 dark:text-white">
-                                {label}
-                              </dt>
-                              <dd className="text-gray-700 sm:col-span-2 dark:text-gray-200">
-                                {value === null || value === undefined
-                                  ? '—'
-                                  : String(value)}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </div>
-                    );
-                  })()
+                {successData ? (
+                  <ResponseDetails fields={successFields} />
                 ) : (
                   <p className="text-sm">
                     {success.data ? String(success.data) : 'Saved.'}
