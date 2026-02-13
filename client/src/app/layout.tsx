@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppNav } from "../components/AppNav";
+import { getThemeInitScript } from "../lib/theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,24 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeInitScript = `
-(() => {
-  const key = 'theme-preference';
-  const stored = localStorage.getItem(key);
-  const preference =
-    stored === 'light' || stored === 'dark' || stored === 'system'
-      ? stored
-      : 'system';
-
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const resolved = preference === 'system' ? (isDark ? 'dark' : 'light') : preference;
-
-  document.documentElement.setAttribute('data-theme', resolved);
-  document.documentElement.setAttribute('data-theme-preference', preference);
-  document.documentElement.classList.toggle('dark', resolved === 'dark');
-  document.documentElement.style.colorScheme = resolved;
-})();
-`;
+const themeInitScript = getThemeInitScript();
 
 export default function RootLayout({
   children,

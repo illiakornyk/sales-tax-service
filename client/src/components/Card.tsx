@@ -11,7 +11,7 @@ type CardProps = {
 const variantClasses: Record<CardVariant, string> = {
   light:
     'border-slate-200 bg-white/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/60 dark:shadow-[0_20px_60px_-35px_rgba(15,23,42,0.7)]',
-  dark: 'border-slate-200 bg-white/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)] backdrop-blur dark:border-slate-800 dark:bg-slate-900/60 dark:shadow-[0_20px_60px_-35px_rgba(15,23,42,0.7)]',
+  dark: 'border-slate-300 bg-slate-100/85 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)] backdrop-blur dark:border-slate-700 dark:bg-slate-950/75 dark:shadow-[0_20px_60px_-35px_rgba(2,6,23,0.85)]',
   plain: 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60',
 };
 

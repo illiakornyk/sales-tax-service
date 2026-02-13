@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useThemePreference } from '../hooks/use-theme-preference';
 import { getApiBase } from '../lib/api';
 import { cn } from '../lib/cn';
+import type { ThemePreference } from '../lib/theme';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Geography' },
@@ -14,40 +15,10 @@ const NAV_ITEMS = [
   { href: '/admin/tax-rates', label: 'Admin Rates' },
 ] as const;
 
-type ThemePreference = 'system' | 'light' | 'dark';
-const THEME_STORAGE_KEY = 'theme-preference';
-
 export function AppNav() {
   const pathname = usePathname();
   const swaggerHref = `${getApiBase()}/api`;
-  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
-    return readThemePreference();
-  });
-
-  useEffect(() => {
-    applyTheme(themePreference);
-    writeThemePreference(themePreference);
-  }, [themePreference]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = () => {
-      if (themePreference === 'system') {
-        applyTheme('system');
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-    return () => {
-      mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    };
-  }, [themePreference]);
-
-  const handleThemeChange = (next: ThemePreference) => {
-    applyTheme(next);
-    writeThemePreference(next);
-    setThemePreference(next);
-  };
+  const { themePreference, setThemePreference } = useThemePreference();
 
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
@@ -96,7 +67,7 @@ export function AppNav() {
             <select
               value={themePreference}
               onChange={(event) =>
-                handleThemeChange(event.target.value as ThemePreference)
+                setThemePreference(event.target.value as ThemePreference)
               }
               className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium normal-case tracking-normal text-slate-700 focus:border-slate-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:border-slate-500"
             >
@@ -109,40 +80,4 @@ export function AppNav() {
       </nav>
     </header>
   );
-}
-
-function applyTheme(preference: ThemePreference) {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const resolved =
-    preference === 'system' ? (prefersDark ? 'dark' : 'light') : preference;
-
-  document.documentElement.setAttribute('data-theme', resolved);
-  document.documentElement.setAttribute('data-theme-preference', preference);
-  document.documentElement.classList.toggle('dark', resolved === 'dark');
-  document.documentElement.style.colorScheme = resolved;
-}
-
-function readThemePreference(): ThemePreference {
-  if (typeof window === 'undefined') {
-    return 'system';
-  }
-  try {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    return saved === 'light' || saved === 'dark' || saved === 'system'
-      ? saved
-      : 'system';
-  } catch {
-    return 'system';
-  }
-}
-
-function writeThemePreference(preference: ThemePreference): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, preference);
-  } catch {
-    // Ignore storage write failures (private mode / restricted policies).
-  }
 }
