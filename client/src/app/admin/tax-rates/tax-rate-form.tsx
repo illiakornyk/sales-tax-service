@@ -12,18 +12,14 @@ import { StateCodeSelectField } from '../../../components/StateCodeSelectField';
 import { useStateCodes } from '../../../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../../../lib/api';
 import { dateTimePartsToIso, isoToDateTimeLocal } from '../../../lib/datetime';
-
-type JurisdictionType = 'STATE' | 'COUNTY' | 'CITY';
-
-type CreateTaxRatePayload = {
-  jurisdictionType: JurisdictionType;
-  stateCode: string;
-  countyName?: string;
-  cityId?: number;
-  cityName?: string;
-  rate: number;
-  startTime: string;
-};
+import {
+  buildCreateTaxRateRequestBody,
+  buildSuccessFields,
+  getSubmitErrorMessage,
+  parseSuccessData,
+  type CreateTaxRatePayload,
+  type JurisdictionType,
+} from './tax-rate-form.helpers';
 
 type ApiError = {
   status: number;
@@ -75,21 +71,14 @@ export function TaxRateForm() {
     setError(null);
     setSuccess(null);
     try {
+      const requestBody = buildCreateTaxRateRequestBody(payload);
       const response = await fetchJson<Record<string, unknown>>(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
-        body: JSON.stringify({
-          jurisdictionType: payload.jurisdictionType,
-          stateCode: payload.stateCode.trim().toUpperCase(),
-          countyName: showCounty ? payload.countyName?.trim() : undefined,
-          cityId: showCity ? payload.cityId : undefined,
-          cityName: showCity ? payload.cityName?.trim() : undefined,
-          rate: Number(payload.rate),
-          startTime: payload.startTime,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -101,10 +90,7 @@ export function TaxRateForm() {
     } catch (submitError) {
       setError({
         status: 0,
-        message:
-          submitError instanceof Error
-            ? submitError.message
-            : 'Failed to create tax rate.',
+        message: getSubmitErrorMessage(submitError),
       });
     } finally {
       setLoading(false);
@@ -122,22 +108,8 @@ export function TaxRateForm() {
     }
   };
 
-  const successData =
-    success?.data && typeof success.data === 'object'
-      ? (success.data as Record<string, unknown>)
-      : null;
-
-  const successFields = successData
-    ? [
-        { label: 'ID', value: successData.id },
-        { label: 'Jurisdiction', value: successData.jurisdiction_type },
-        { label: 'State', value: successData.state_code },
-        { label: 'County', value: successData.county_name },
-        { label: 'City ID', value: successData.city_id },
-        { label: 'Rate', value: successData.rate },
-        { label: 'Start Time', value: successData.start_time },
-      ]
-    : [];
+  const successData = parseSuccessData(success?.data ?? null);
+  const successFields = successData ? buildSuccessFields(successData) : [];
 
   return (
     <PageShell mainClassName="max-w-4xl">
