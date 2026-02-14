@@ -8,6 +8,7 @@ import { FormField, FormInput, FormSelect } from '../../../components/FormField'
 import { LoadingInline } from '../../../components/LoadingState';
 import { PageShell } from '../../../components/PageShell';
 import { ResponseDetails } from '../../../components/ResponseDetails';
+import { StateCodeSelectField } from '../../../components/StateCodeSelectField';
 import { useStateCodes } from '../../../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../../../lib/api';
 import { dateTimePartsToIso, isoToDateTimeLocal } from '../../../lib/datetime';
@@ -173,28 +174,14 @@ export function TaxRateForm() {
                     <option value="CITY">CITY</option>
                   </FormSelect>
                 </FormField>
-                <FormField
-                  label="State code"
+                <StateCodeSelectField
+                  value={payload.stateCode}
+                  states={states}
+                  loading={statesLoading}
                   error={statesError}
+                  onChange={(value) => updateField('stateCode', value)}
                   errorClassName="text-rose-500 dark:text-rose-300"
-                >
-                  <FormSelect
-                    value={payload.stateCode}
-                    onChange={(event) =>
-                      updateField('stateCode', event.target.value)
-                    }
-                    disabled={statesLoading}
-                  >
-                    <option value="">
-                      {statesLoading ? 'Loading states...' : 'Select a state'}
-                    </option>
-                    {states.map((code) => (
-                      <option key={code} value={code}>
-                        {code}
-                      </option>
-                    ))}
-                  </FormSelect>
-                </FormField>
+                />
                 <FormField
                   label="Rate"
                   hint={`Min ${MIN_RATE * 100}%, max ${MAX_RATE * 100}%`}

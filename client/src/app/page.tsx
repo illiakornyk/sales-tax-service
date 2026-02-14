@@ -3,9 +3,10 @@
 import { Alert } from '../components/Alert';
 import { Button, ButtonGroup } from '../components/Button';
 import { Card } from '../components/Card';
-import { FormField, FormInput, FormSelect } from '../components/FormField';
+import { FormField, FormInput } from '../components/FormField';
 import { LoadingInline, TableSkeletonRows } from '../components/LoadingState';
 import { PageShell } from '../components/PageShell';
+import { StateCodeSelectField } from '../components/StateCodeSelectField';
 import { useGeographyZipList } from '../hooks/use-geography-zip-list';
 import { useStateCodes } from '../hooks/use-state-codes';
 
@@ -50,29 +51,17 @@ export default function Home() {
 
       <Card variant="light">
         <div className="grid gap-4 md:grid-cols-[1.2fr_1fr_1fr_auto] md:items-end">
-          <FormField
-            label="State code"
+          <StateCodeSelectField
+            value={draftFilters.stateCode}
+            states={states}
+            loading={statesLoading}
             error={statesError}
-            errorClassName="text-rose-500"
-            className="text-slate-700 dark:text-slate-300"
+            onChange={setDraftStateCode}
+            fieldClassName="text-slate-700 dark:text-slate-300"
             hintClassName="text-slate-500 dark:text-slate-400"
-          >
-            <FormSelect
-              value={draftFilters.stateCode}
-              onChange={(event) => setDraftStateCode(event.target.value)}
-              disabled={statesLoading}
-              className="text-base"
-            >
-              <option value="">
-                {statesLoading ? 'Loading states...' : 'Select a state'}
-              </option>
-              {states.map((code) => (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              ))}
-            </FormSelect>
-          </FormField>
+            errorClassName="text-rose-500"
+            selectClassName="text-base"
+          />
           <FormField label="Page size" className="text-slate-700 dark:text-slate-300">
             <FormInput
               value={draftFilters.take}
