@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { fetchJson, getApiBase } from '../lib/api';
+import { geographyStatesUrl } from '../lib/endpoints';
 
 export function useStateCodes() {
   const [states, setStates] = useState<string[]>([]);
@@ -15,10 +16,9 @@ export function useStateCodes() {
     const loadStates = async () => {
       setLoading(true);
       try {
-        const response = await fetchJson<string[]>(
-          `${apiBase}/geography/states`,
-          { cache: 'no-store' },
-        );
+        const response = await fetchJson<string[]>(geographyStatesUrl(apiBase), {
+          cache: 'no-store',
+        });
         if (!active) return;
 
         if (response.ok) {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { fetchJson, getApiBase } from '../lib/api';
+import { geographyStateZipListUrl } from '../lib/endpoints';
 
 export type ZipSummary = {
   zip: string;
@@ -50,9 +51,11 @@ export function useGeographyZipList() {
     setLoading(true);
     setError(null);
     try {
-      const url = new URL(`/geography/state/${normalizedAppliedStateCode}`, apiBase);
-      url.searchParams.set('skip', String(appliedFilters.skip));
-      url.searchParams.set('take', String(appliedFilters.take));
+      const url = geographyStateZipListUrl(apiBase, {
+        stateCode: normalizedAppliedStateCode,
+        skip: appliedFilters.skip,
+        take: appliedFilters.take,
+      });
 
       const response = await fetchJson<ZipSummary[]>(url, { cache: 'no-store' });
       if (!response.ok) {

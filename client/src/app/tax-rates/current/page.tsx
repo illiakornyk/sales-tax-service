@@ -12,6 +12,7 @@ import {
 } from '../../../components/LoadingState';
 import { PageShell } from '../../../components/PageShell';
 import { fetchJson, getApiBase } from '../../../lib/api';
+import { currentTaxRatesUrl } from '../../../lib/endpoints';
 import { formatDateTime } from '../../../lib/format';
 import type { CurrentTaxRatesResponse } from '../../../types/tax-rates';
 import type {
@@ -40,13 +41,14 @@ export default function CurrentTaxRatesPage() {
     setLoading(true);
     setError(null);
     try {
-      const url = new URL('/tax-rates/current', apiBase);
-      url.searchParams.set('stateSkip', String(sectionSkips.state));
-      url.searchParams.set('stateTake', String(SECTION_PAGE_SIZE));
-      url.searchParams.set('countySkip', String(sectionSkips.county));
-      url.searchParams.set('countyTake', String(SECTION_PAGE_SIZE));
-      url.searchParams.set('citySkip', String(sectionSkips.city));
-      url.searchParams.set('cityTake', String(SECTION_PAGE_SIZE));
+      const url = currentTaxRatesUrl(apiBase, {
+        stateSkip: sectionSkips.state,
+        stateTake: SECTION_PAGE_SIZE,
+        countySkip: sectionSkips.county,
+        countyTake: SECTION_PAGE_SIZE,
+        citySkip: sectionSkips.city,
+        cityTake: SECTION_PAGE_SIZE,
+      });
 
       const response = await fetchJson<CurrentTaxRatesResponse>(url, {
         headers: { accept: 'application/json' },

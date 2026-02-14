@@ -10,6 +10,7 @@ import { PageShell } from '../../components/PageShell';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
 import { dateTimeLocalToIso, isoToDateTimeLocal } from '../../lib/datetime';
+import { taxRatesByZipUrl } from '../../lib/endpoints';
 import { formatDateTime, formatRate } from '../../lib/format';
 import type { ZipRateResult } from '../../types/tax-rates';
 
@@ -46,8 +47,10 @@ export default function TaxRatesLookupPage() {
 
     setLoading(true);
     try {
-      const url = new URL(`/tax-rates/zip/${zip}`, apiBase);
-      url.searchParams.set('at', parsedAt.toISOString());
+      const url = taxRatesByZipUrl(apiBase, {
+        zip,
+        atIso: parsedAt.toISOString(),
+      });
 
       const response = await fetchJson<ZipRateResult>(url, {
         headers: { accept: 'application/json' },
