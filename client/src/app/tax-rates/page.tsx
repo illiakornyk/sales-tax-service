@@ -9,6 +9,7 @@ import { LoadingInline } from '../../components/LoadingState';
 import { PageShell } from '../../components/PageShell';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
+import { dateTimeLocalToIso, isoToDateTimeLocal } from '../../lib/datetime';
 import { formatDateTime, formatRate } from '../../lib/format';
 import type { ZipRateResult } from '../../types/tax-rates';
 
@@ -27,13 +28,7 @@ export default function TaxRatesLookupPage() {
 
   const parsedAt = new Date(atIso);
   const atIsValid = !Number.isNaN(parsedAt.getTime());
-
-  const pad = (value: number) => String(value).padStart(2, '0');
-  const localDateTimeValue = atIsValid
-    ? `${parsedAt.getFullYear()}-${pad(parsedAt.getMonth() + 1)}-${pad(
-        parsedAt.getDate(),
-      )}T${pad(parsedAt.getHours())}:${pad(parsedAt.getMinutes())}`
-    : '';
+  const localDateTimeValue = isoToDateTimeLocal(atIso);
 
   const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -110,9 +105,9 @@ export default function TaxRatesLookupPage() {
                 <FormInput
                   value={localDateTimeValue}
                   onChange={(event) => {
-                    const next = new Date(event.target.value);
-                    if (!Number.isNaN(next.getTime())) {
-                      setAtIso(next.toISOString());
+                    const isoValue = dateTimeLocalToIso(event.target.value);
+                    if (isoValue) {
+                      setAtIso(isoValue);
                     }
                   }}
                   type="datetime-local"

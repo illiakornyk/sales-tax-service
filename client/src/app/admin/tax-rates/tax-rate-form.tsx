@@ -10,6 +10,7 @@ import { PageShell } from '../../../components/PageShell';
 import { ResponseDetails } from '../../../components/ResponseDetails';
 import { useStateCodes } from '../../../hooks/use-state-codes';
 import { fetchJson, getApiBase } from '../../../lib/api';
+import { dateTimePartsToIso, isoToDateTimeLocal } from '../../../lib/datetime';
 
 type JurisdictionType = 'STATE' | 'COUNTY' | 'CITY';
 
@@ -109,40 +110,14 @@ export function TaxRateForm() {
     }
   };
 
-  const pad = (value: number) => String(value).padStart(2, '0');
-  const parsedStartTime = (() => {
-    if (!payload.startTime) return null;
-    const parsed = new Date(payload.startTime);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  })();
-  const localDateValue = parsedStartTime
-    ? `${parsedStartTime.getFullYear()}-${pad(
-        parsedStartTime.getMonth() + 1,
-      )}-${pad(parsedStartTime.getDate())}`
-    : '';
-  const localTimeValue = parsedStartTime
-    ? `${pad(parsedStartTime.getHours())}:${pad(parsedStartTime.getMinutes())}`
-    : '';
-  const localDateTimeValue =
-    localDateValue && localTimeValue
-      ? `${localDateValue}T${localTimeValue}`
-      : '';
+  const localDateTimeValue = isoToDateTimeLocal(payload.startTime);
 
   const updateFromDateTimeParts = (nextDate: string, nextTime: string) => {
-    if (!nextDate) return;
-    const [year, month, day] = nextDate.split('-').map(Number);
-    const [hours, minutes] = (nextTime || '00:00').split(':').map(Number);
-    if (
-      [year, month, day, hours, minutes].some((value) => Number.isNaN(value))
-    ) {
-      return;
-    }
-    if (year < MIN_YEAR) {
-      return;
-    }
-    const local = new Date(year, month - 1, day, hours, minutes, 0, 0);
-    if (!Number.isNaN(local.getTime())) {
-      updateField('startTime', local.toISOString());
+    const isoValue = dateTimePartsToIso(nextDate, nextTime, {
+      minYear: MIN_YEAR,
+    });
+    if (isoValue) {
+      updateField('startTime', isoValue);
     }
   };
 
