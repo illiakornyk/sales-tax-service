@@ -10,30 +10,7 @@ import { PageShell } from '../../components/PageShell';
 import { TaxRateIndicator } from '../../components/TaxRateIndicator';
 import { fetchJson, getApiBase } from '../../lib/api';
 import { formatDateTime, formatRate } from '../../lib/format';
-
-type RateRow = {
-  id: string;
-  jurisdiction_type: string;
-  state_code: string;
-  county_name: string | null;
-  city_id: string | null;
-  city_name?: string | null;
-  rate: string;
-  start_time: string;
-};
-
-type ZipRateResult = {
-  state: RateRow;
-  county: RateRow;
-  city: RateRow[];
-  total_rate: string;
-  breakdown: {
-    state_rate: string;
-    county_rate: string;
-    max_city_rate: string;
-    max_city?: { city_id: string; city_name: string } | null;
-  };
-};
+import type { ZipRateResult } from '../../types/tax-rates';
 
 const ZIP_REGEX = /^\d{5}$/;
 const detailCardClass =

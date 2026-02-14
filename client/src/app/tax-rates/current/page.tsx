@@ -13,9 +13,8 @@ import {
 import { PageShell } from '../../../components/PageShell';
 import { fetchJson, getApiBase } from '../../../lib/api';
 import { formatDateTime } from '../../../lib/format';
+import type { CurrentTaxRatesResponse } from '../../../types/tax-rates';
 import type {
-  CurrentTaxRateItem,
-  CurrentTaxRateSectionPagination,
   PaginationDirection,
   RatesSectionKind,
   SectionSkips,
@@ -23,18 +22,6 @@ import type {
 } from '../../../components/current-rates/types';
 
 const SECTION_PAGE_SIZE = 15;
-
-type CurrentTaxRatesResponse = {
-  as_of: string;
-  state: CurrentTaxRateItem[];
-  county: CurrentTaxRateItem[];
-  city: CurrentTaxRateItem[];
-  pagination: {
-    state: CurrentTaxRateSectionPagination;
-    county: CurrentTaxRateSectionPagination;
-    city: CurrentTaxRateSectionPagination;
-  };
-};
 
 export default function CurrentTaxRatesPage() {
   const [data, setData] = useState<CurrentTaxRatesResponse | null>(null);
