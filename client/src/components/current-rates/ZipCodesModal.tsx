@@ -41,7 +41,7 @@ export function ZipCodesModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg dark:bg-gray-900"
+        className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg max-[425px]:p-4 dark:bg-gray-900"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -79,8 +79,8 @@ export function ZipCodesModal({
           <p className="text-pretty text-gray-700 dark:text-gray-200">
             {cityName} (City ID: {cityId})
           </p>
-          <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-gray-200 p-3 dark:border-gray-700">
-            <div className="grid grid-cols-4 gap-2 text-sm text-gray-700 dark:text-gray-200">
+          <div className="mt-4 max-h-[360px] overflow-y-auto rounded-lg border border-gray-200 p-3 max-[425px]:p-2 dark:border-gray-700">
+            <div className="grid grid-cols-4 gap-2 text-sm text-gray-700 max-[425px]:grid-cols-2 dark:text-gray-200">
               {zipCodes.map((zip) => (
                 <span
                   key={zip}
