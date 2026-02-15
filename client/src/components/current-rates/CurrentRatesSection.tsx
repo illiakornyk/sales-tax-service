@@ -80,18 +80,14 @@ export function CurrentRatesSection({
                     key={getRowKey(item)}
                     className="*:text-gray-900 *:first:font-medium dark:*:text-white"
                   >
-                    <td className={tableCellClass}>
-                      {item.state_code}
-                    </td>
+                    <td className={tableCellClass}>{item.state_code}</td>
                     {kind === 'county' ? (
                       <td className={tableCellClass}>
                         {item.county_name ?? '—'}
                       </td>
                     ) : null}
                     {kind === 'city' ? (
-                      <td className={tableCellClass}>
-                        {item.city_id ?? '—'}
-                      </td>
+                      <td className={tableCellClass}>{item.city_id ?? '—'}</td>
                     ) : null}
                     {kind === 'city' ? (
                       <td className={`${tableCellClass} break-words`}>
@@ -126,7 +122,7 @@ export function CurrentRatesSection({
                         >
                           <span className="max-[768px]:hidden">View all</span>
                           <Image
-                            src="/view_grid.svg"
+                            src="/view_icon.svg"
                             alt=""
                             aria-hidden="true"
                             width={14}

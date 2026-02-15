@@ -112,25 +112,28 @@ export function TaxRateForm() {
   const successFields = successData ? buildSuccessFields(successData) : [];
 
   return (
-    <PageShell mainClassName="max-w-4xl">
-        <header>
+    <PageShell
+      className="max-[425px]:px-3 max-[425px]:py-6"
+      mainClassName="max-w-4xl max-[425px]:gap-4"
+    >
+      <header>
           <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-500">
             Admin Console
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight max-[425px]:text-2xl">
             Configure tax rates
           </h1>
-          <p className="mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm text-slate-600 max-[425px]:mt-2 max-[425px]:text-xs dark:text-slate-400">
             Create a new tax rate version. State requires only state code.
             County requires county name. City requires city id or city name
             (state + city name).
           </p>
-        </header>
+      </header>
 
-        <Card variant="light">
-          <form className="grid gap-5" onSubmit={handleSubmit}>
-            <fieldset disabled={loading} className="grid gap-5">
-              <div className="grid gap-4 md:grid-cols-3">
+      <Card variant="light" className="max-[425px]:p-3">
+        <form className="grid gap-5 max-[425px]:gap-3" onSubmit={handleSubmit}>
+          <fieldset disabled={loading} className="grid gap-5 max-[425px]:gap-3">
+            <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-3">
                 <FormField label="Jurisdiction">
                   <FormSelect
                     value={payload.jurisdictionType}
@@ -185,7 +188,7 @@ export function TaxRateForm() {
               ) : null}
 
               {showCity ? (
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-2">
                   <FormField label="City ID">
                     <FormInput
                       value={payload.cityId ?? ''}
@@ -208,7 +211,7 @@ export function TaxRateForm() {
                 </div>
               ) : null}
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-2">
                 <FormField label="Start time (ISO-8601)">
                   <FormInput
                     value={payload.startTime}
@@ -240,52 +243,52 @@ export function TaxRateForm() {
                 </FormField>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 max-[425px]:gap-2">
                 <Button
                   type="submit"
                   variant="success"
                   disabled={loading}
-                  className="px-6 py-2 text-sm font-semibold"
+                  className="px-6 py-2 text-sm font-semibold max-[425px]:px-3 max-[425px]:py-1.5 max-[425px]:text-xs"
                 >
                   {loading ? 'Saving...' : 'Create rate'}
                 </Button>
-                <span className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+                <span className="text-xs uppercase tracking-[0.3em] text-slate-500 max-[425px]:text-[10px] max-[425px]:tracking-[0.2em] dark:text-slate-400">
                   API {apiEndpoint} · backend {apiBase}
                 </span>
               </div>
           </fieldset>
-          </form>
+        </form>
 
-          {loading ? (
-            <div className="mt-4">
-              <LoadingInline label="Saving tax rate version..." />
-            </div>
-          ) : null}
+        {loading ? (
+          <div className="mt-4 max-[425px]:mt-3">
+            <LoadingInline label="Saving tax rate version..." />
+          </div>
+        ) : null}
 
-          {error ? (
-            <div className="mt-4">
-              <Alert
-                variant="error"
-                title={`Error ${error.status || ''}`.trim()}
-              >
-                <div className="text-sm font-medium">{error.message}</div>
-              </Alert>
-            </div>
-          ) : null}
-          {success ? (
-            <div className="mt-4">
-              <Alert variant="success" title={`Success ${success.status}`}>
-                {successData ? (
-                  <ResponseDetails fields={successFields} />
-                ) : (
-                  <p className="text-sm">
-                    {success.data ? String(success.data) : 'Saved.'}
-                  </p>
-                )}
-              </Alert>
-            </div>
-          ) : null}
-        </Card>
+        {error ? (
+          <div className="mt-4 max-[425px]:mt-3">
+            <Alert
+              variant="error"
+              title={`Error ${error.status || ''}`.trim()}
+            >
+              <div className="text-sm font-medium">{error.message}</div>
+            </Alert>
+          </div>
+        ) : null}
+        {success ? (
+          <div className="mt-4 max-[425px]:mt-3">
+            <Alert variant="success" title={`Success ${success.status}`}>
+              {successData ? (
+                <ResponseDetails fields={successFields} />
+              ) : (
+                <p className="text-sm">
+                  {success.data ? String(success.data) : 'Saved.'}
+                </p>
+              )}
+            </Alert>
+          </div>
+        ) : null}
+      </Card>
     </PageShell>
   );
 }
