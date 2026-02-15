@@ -23,7 +23,7 @@ export function SectionPagination({
   const nextDisabled = loading || !pagination.has_more;
 
   return (
-    <ul className="flex justify-center gap-3 text-gray-900 dark:text-white">
+    <ul className="flex justify-center gap-3 text-gray-900 max-[425px]:gap-2 dark:text-white">
       <li>
         <a
           href="#"
@@ -34,7 +34,7 @@ export function SectionPagination({
               onPrev();
             }
           }}
-          className="grid size-8 place-content-center rounded border border-gray-200 transition-colors hover:bg-gray-50 rtl:rotate-180 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="grid size-8 place-content-center rounded border border-gray-200 transition-colors hover:bg-gray-50 rtl:rotate-180 max-[425px]:size-7 dark:border-gray-700 dark:hover:bg-gray-800"
           aria-disabled={prevDisabled}
         >
           <svg
@@ -52,7 +52,7 @@ export function SectionPagination({
         </a>
       </li>
 
-      <li className="text-sm/8 font-medium tracking-widest">
+      <li className="text-sm/8 font-medium tracking-widest max-[425px]:text-xs/7">
         {currentPage}/{totalPages}
       </li>
 
@@ -66,7 +66,7 @@ export function SectionPagination({
               onNext();
             }
           }}
-          className="grid size-8 place-content-center rounded border border-gray-200 transition-colors hover:bg-gray-50 rtl:rotate-180 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="grid size-8 place-content-center rounded border border-gray-200 transition-colors hover:bg-gray-50 rtl:rotate-180 max-[425px]:size-7 dark:border-gray-700 dark:hover:bg-gray-800"
           aria-disabled={nextDisabled}
         >
           <svg

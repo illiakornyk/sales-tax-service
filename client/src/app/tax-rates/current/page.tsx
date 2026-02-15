@@ -95,16 +95,19 @@ export default function CurrentTaxRatesPage() {
   };
 
   return (
-    <PageShell mainClassName="max-w-6xl">
-        <header className="flex flex-wrap items-end justify-between gap-4">
+    <PageShell
+      className="max-[425px]:px-3 max-[425px]:py-6"
+      mainClassName="max-w-6xl max-[425px]:gap-4"
+    >
+      <header className="flex flex-wrap items-end justify-between gap-4 max-[425px]:gap-2">
           <div>
             <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
               Tax Rates
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight max-[425px]:text-2xl">
               Current active rates
             </h1>
-            <p className="mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-3 max-w-2xl text-sm text-slate-600 max-[425px]:mt-2 max-[425px]:text-xs dark:text-slate-400">
               Shows latest active rows from tax rates per jurisdiction identity.
             </p>
           </div>
@@ -113,11 +116,11 @@ export default function CurrentTaxRatesPage() {
             variant="primary"
             onClick={() => void loadCurrentRates()}
             disabled={loading}
-            className="h-10 px-5 text-sm font-semibold"
+            className="h-10 px-5 text-sm font-semibold max-[425px]:h-8 max-[425px]:px-3 max-[425px]:text-xs"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
           </Button>
-        </header>
+      </header>
 
         {error ? (
           <Alert variant="error">
@@ -127,9 +130,9 @@ export default function CurrentTaxRatesPage() {
 
         {loading ? <LoadingInline label="Loading current rates..." /> : null}
 
-        {data ? (
-          <Card variant="light">
-            <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-300 md:grid-cols-4">
+      {data ? (
+        <Card variant="light" className="max-[425px]:p-3">
+          <div className="grid gap-2 text-sm text-slate-700 max-[425px]:gap-1 max-[425px]:text-xs dark:text-slate-300 md:grid-cols-4">
               <div>
                 <span className="text-slate-500">As of</span>
                 <p className="font-medium">{formatDateTime(data.as_of)}</p>
@@ -147,18 +150,24 @@ export default function CurrentTaxRatesPage() {
                 <p className="font-medium">{data.pagination.city.total}</p>
               </div>
             </div>
-          </Card>
-        ) : null}
+        </Card>
+      ) : null}
 
-        {loading && !data ? (
-          <Card variant="light">
+      {loading && !data ? (
+        <Card variant="light" className="max-[425px]:p-3">
             <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
             <table className="min-w-full divide-y-2 divide-gray-200 text-sm dark:divide-gray-700">
               <thead className="ltr:text-left rtl:text-right">
                 <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
-                  <th className="px-3 py-2 whitespace-nowrap">State</th>
-                  <th className="px-3 py-2 whitespace-nowrap">Rate (%)</th>
-                  <th className="px-3 py-2 whitespace-nowrap">Start Time</th>
+                  <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
+                    State
+                  </th>
+                  <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
+                    Rate (%)
+                  </th>
+                  <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
+                    Start Time
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -166,43 +175,43 @@ export default function CurrentTaxRatesPage() {
                   columns={3}
                   rows={4}
                   tone="light"
-                  cellClassName="px-3 py-2 whitespace-nowrap"
+                  cellClassName="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1"
                 />
               </tbody>
             </table>
-          </Card>
-        ) : null}
+        </Card>
+      ) : null}
 
-        <div className="grid gap-6">
-          <CurrentRatesSection
-            kind="state"
-            title="State"
-            items={data?.state ?? []}
-            pagination={data?.pagination.state}
-            loading={loading}
-            onPageChange={handleSectionPagination}
-            onOpenZipModal={setZipModal}
-          />
-          <CurrentRatesSection
-            kind="county"
-            title="County"
-            items={data?.county ?? []}
-            pagination={data?.pagination.county}
-            loading={loading}
-            onPageChange={handleSectionPagination}
-            onOpenZipModal={setZipModal}
-          />
-          <CurrentRatesSection
-            kind="city"
-            title="City"
-            items={data?.city ?? []}
-            pagination={data?.pagination.city}
-            loading={loading}
-            onPageChange={handleSectionPagination}
-            onOpenZipModal={setZipModal}
-          />
-        </div>
-      
+      <div className="grid min-w-0 gap-6 max-[425px]:gap-4">
+        <CurrentRatesSection
+          kind="state"
+          title="State"
+          items={data?.state ?? []}
+          pagination={data?.pagination.state}
+          loading={loading}
+          onPageChange={handleSectionPagination}
+          onOpenZipModal={setZipModal}
+        />
+        <CurrentRatesSection
+          kind="county"
+          title="County"
+          items={data?.county ?? []}
+          pagination={data?.pagination.county}
+          loading={loading}
+          onPageChange={handleSectionPagination}
+          onOpenZipModal={setZipModal}
+        />
+        <CurrentRatesSection
+          kind="city"
+          title="City"
+          items={data?.city ?? []}
+          pagination={data?.pagination.city}
+          loading={loading}
+          onPageChange={handleSectionPagination}
+          onOpenZipModal={setZipModal}
+        />
+      </div>
+
       {zipModal ? (
         <ZipCodesModal
           cityId={zipModal.cityId}
