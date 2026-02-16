@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
-import { GeographyController } from './geography.controller';
-import { GeographyService } from './geography.service';
+import { PrismaModule } from '@/prisma/prisma.module';
+import { GeographyController } from '@/geography/geography.controller';
+import { GeographyService } from '@/geography/geography.service';
 
 @Module({
   imports: [PrismaModule],
