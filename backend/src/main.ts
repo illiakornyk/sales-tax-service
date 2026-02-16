@@ -34,6 +34,28 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
+  let isShuttingDown = false;
+  const handleSigterm = async () => {
+    if (isShuttingDown) {
+      return;
+    }
+    isShuttingDown = true;
+
+    logger.log('SIGTERM received. Starting graceful shutdown...');
+    try {
+      await app.close();
+      logger.log('Graceful shutdown completed. Exiting with code 0.');
+      process.exit(0);
+    } catch (error) {
+      logger.error('Graceful shutdown failed', String(error));
+      process.exit(1);
+    }
+  };
+
+  process.once('SIGTERM', () => {
+    void handleSigterm();
+  });
+
   await app.listen(port);
 }
 void bootstrap();
