@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 type FormFieldProps = {
   label: React.ReactNode;
@@ -31,7 +31,9 @@ export function FormField({
       </span>
       <div>{children}</div>
       {error ? (
-        <span className={cn('mt-1 block text-xs text-rose-500', errorClassName)}>
+        <span
+          className={cn('mt-1 block text-xs text-rose-500', errorClassName)}
+        >
           {error}
         </span>
       ) : hint ? (

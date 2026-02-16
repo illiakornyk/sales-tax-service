@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 type ButtonPosition = 'single' | 'left' | 'middle' | 'right';
 type ButtonVariant = 'neutral' | 'primary' | 'success';

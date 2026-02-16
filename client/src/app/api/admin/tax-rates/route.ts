@@ -1,4 +1,4 @@
-import { getApiBase } from '../../../../lib/api';
+import { getApiBase } from '@/lib/api';
 
 export async function POST(request: Request) {
   const apiKey = request.headers.get("x-api-key") ?? "";

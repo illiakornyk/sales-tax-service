@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 type LoadingInlineProps = {
   label?: string;
@@ -10,7 +10,12 @@ export function LoadingInline({
   className,
 }: LoadingInlineProps) {
   return (
-    <div className={cn('flex items-center gap-2 text-sm text-slate-400', className)}>
+    <div
+      className={cn(
+        'flex items-center gap-2 text-sm text-slate-400',
+        className,
+      )}
+    >
       <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-slate-200" />
       <span>{label}</span>
     </div>
@@ -37,7 +42,10 @@ export function TableSkeletonRows({
       {Array.from({ length: rows }).map((_, rowIndex) => (
         <tr key={`skeleton-row-${rowIndex}`} className="animate-pulse">
           {Array.from({ length: columns }).map((__, columnIndex) => (
-            <td key={`skeleton-cell-${rowIndex}-${columnIndex}`} className={cellClassName}>
+            <td
+              key={`skeleton-cell-${rowIndex}-${columnIndex}`}
+              className={cellClassName}
+            >
               <div
                 className={cn(
                   'h-4 rounded',

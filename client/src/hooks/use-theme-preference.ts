@@ -7,7 +7,7 @@ import {
   SYSTEM_DARK_MEDIA_QUERY,
   writeThemePreference,
   type ThemePreference,
-} from '../lib/theme';
+} from '@/lib/theme';
 
 export function useThemePreference() {
   const [themePreference, setThemePreference] = useState<ThemePreference>(() =>

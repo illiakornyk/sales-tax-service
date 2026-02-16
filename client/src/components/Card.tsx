@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 type CardVariant = 'light' | 'dark' | 'plain';
 
@@ -18,7 +18,11 @@ const variantClasses: Record<CardVariant, string> = {
 export function Card({ children, className, variant = 'plain' }: CardProps) {
   return (
     <section
-      className={cn('rounded-2xl border p-6', variantClasses[variant], className)}
+      className={cn(
+        'rounded-2xl border p-6',
+        variantClasses[variant],
+        className,
+      )}
     >
       {children}
     </section>

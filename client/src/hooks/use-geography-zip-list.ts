@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchJson, getApiBase } from '../lib/api';
-import { geographyStateZipListUrl } from '../lib/endpoints';
+import { fetchJson, getApiBase } from '@/lib/api';
+import { geographyStateZipListUrl } from '@/lib/endpoints';
 
 export type ZipSummary = {
   zip: string;
@@ -34,7 +34,9 @@ export function useGeographyZipList() {
 
   const apiBase = getApiBase();
   const normalizedDraftStateCode = draftFilters.stateCode.trim().toUpperCase();
-  const normalizedAppliedStateCode = appliedFilters.stateCode.trim().toUpperCase();
+  const normalizedAppliedStateCode = appliedFilters.stateCode
+    .trim()
+    .toUpperCase();
 
   const hasPendingFilterChanges =
     normalizedDraftStateCode !== normalizedAppliedStateCode ||
@@ -57,7 +59,9 @@ export function useGeographyZipList() {
         take: appliedFilters.take,
       });
 
-      const response = await fetchJson<ZipSummary[]>(url, { cache: 'no-store' });
+      const response = await fetchJson<ZipSummary[]>(url, {
+        cache: 'no-store',
+      });
       if (!response.ok) {
         throw new Error(response.message);
       }
@@ -74,7 +78,12 @@ export function useGeographyZipList() {
     } finally {
       setLoading(false);
     }
-  }, [apiBase, normalizedAppliedStateCode, appliedFilters.skip, appliedFilters.take]);
+  }, [
+    apiBase,
+    normalizedAppliedStateCode,
+    appliedFilters.skip,
+    appliedFilters.take,
+  ]);
 
   useEffect(() => {
     void fetchRows();

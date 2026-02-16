@@ -1,7 +1,7 @@
 import type {
   CurrentTaxRateItem,
   CurrentTaxRateSectionPagination,
-} from '../../types/tax-rates';
+} from '@/types/tax-rates';
 
 export type { CurrentTaxRateItem, CurrentTaxRateSectionPagination };
 

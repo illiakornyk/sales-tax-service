@@ -1,14 +1,14 @@
 'use client';
 
-import { Alert } from '../components/Alert';
-import { Button, ButtonGroup } from '../components/Button';
-import { Card } from '../components/Card';
-import { FormField, FormInput } from '../components/FormField';
-import { LoadingInline, TableSkeletonRows } from '../components/LoadingState';
-import { PageShell } from '../components/PageShell';
-import { StateCodeSelectField } from '../components/StateCodeSelectField';
-import { useGeographyZipList } from '../hooks/use-geography-zip-list';
-import { useStateCodes } from '../hooks/use-state-codes';
+import { Alert } from '@/components/Alert';
+import { Button, ButtonGroup } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { FormField, FormInput } from '@/components/FormField';
+import { LoadingInline, TableSkeletonRows } from '@/components/LoadingState';
+import { PageShell } from '@/components/PageShell';
+import { StateCodeSelectField } from '@/components/StateCodeSelectField';
+import { useGeographyZipList } from '@/hooks/use-geography-zip-list';
+import { useStateCodes } from '@/hooks/use-state-codes';
 
 export default function Home() {
   const {

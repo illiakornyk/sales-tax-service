@@ -1,4 +1,4 @@
-import type { ResponseDetailsField } from '../../../components/ResponseDetails';
+import type { ResponseDetailsField } from '@/components/ResponseDetails';
 
 export type JurisdictionType = 'STATE' | 'COUNTY' | 'CITY';
 
@@ -21,7 +21,10 @@ type SuccessFieldKey =
   | 'rate'
   | 'start_time';
 
-const SUCCESS_FIELD_DEFINITIONS: Array<{ label: string; key: SuccessFieldKey }> = [
+const SUCCESS_FIELD_DEFINITIONS: Array<{
+  label: string;
+  key: SuccessFieldKey;
+}> = [
   { label: 'ID', key: 'id' },
   { label: 'Jurisdiction', key: 'jurisdiction_type' },
   { label: 'State', key: 'state_code' },

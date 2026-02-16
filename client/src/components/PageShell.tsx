@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 type PageShellProps = {
   children: React.ReactNode;
@@ -6,7 +6,11 @@ type PageShellProps = {
   mainClassName?: string;
 };
 
-export function PageShell({ children, className, mainClassName }: PageShellProps) {
+export function PageShell({
+  children,
+  className,
+  mainClassName,
+}: PageShellProps) {
   return (
     <div
       className={cn(

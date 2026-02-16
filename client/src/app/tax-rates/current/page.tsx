@@ -1,26 +1,23 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Alert } from '../../../components/Alert';
-import { Button } from '../../../components/Button';
-import { Card } from '../../../components/Card';
-import { CurrentRatesSection } from '../../../components/current-rates/CurrentRatesSection';
-import { ZipCodesModal } from '../../../components/current-rates/ZipCodesModal';
-import {
-  LoadingInline,
-  TableSkeletonRows,
-} from '../../../components/LoadingState';
-import { PageShell } from '../../../components/PageShell';
-import { fetchJson, getApiBase } from '../../../lib/api';
-import { currentTaxRatesUrl } from '../../../lib/endpoints';
-import { formatDateTime } from '../../../lib/format';
-import type { CurrentTaxRatesResponse } from '../../../types/tax-rates';
+import { Alert } from '@/components/Alert';
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { CurrentRatesSection } from '@/components/current-rates/CurrentRatesSection';
+import { ZipCodesModal } from '@/components/current-rates/ZipCodesModal';
+import { LoadingInline, TableSkeletonRows } from '@/components/LoadingState';
+import { PageShell } from '@/components/PageShell';
+import { fetchJson, getApiBase } from '@/lib/api';
+import { currentTaxRatesUrl } from '@/lib/endpoints';
+import { formatDateTime } from '@/lib/format';
+import type { CurrentTaxRatesResponse } from '@/types/tax-rates';
 import type {
   PaginationDirection,
   RatesSectionKind,
   SectionSkips,
   ZipModalState,
-} from '../../../components/current-rates/types';
+} from '@/components/current-rates/types';
 
 const SECTION_PAGE_SIZE = 15;
 
@@ -100,85 +97,85 @@ export default function CurrentTaxRatesPage() {
       mainClassName="max-w-6xl max-[425px]:gap-4"
     >
       <header className="flex flex-wrap items-end justify-between gap-4 max-[425px]:gap-2">
-          <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
-              Tax Rates
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight max-[425px]:text-2xl">
-              Current active rates
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm text-slate-600 max-[425px]:mt-2 max-[425px]:text-xs dark:text-slate-400">
-              Shows latest active rows from tax rates per jurisdiction identity.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={() => void loadCurrentRates()}
-            disabled={loading}
-            className="h-10 px-5 text-sm font-semibold max-[425px]:h-8 max-[425px]:px-3 max-[425px]:text-xs"
-          >
-            {loading ? 'Refreshing...' : 'Refresh'}
-          </Button>
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">
+            Tax Rates
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight max-[425px]:text-2xl">
+            Current active rates
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm text-slate-600 max-[425px]:mt-2 max-[425px]:text-xs dark:text-slate-400">
+            Shows latest active rows from tax rates per jurisdiction identity.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="primary"
+          onClick={() => void loadCurrentRates()}
+          disabled={loading}
+          className="h-10 px-5 text-sm font-semibold max-[425px]:h-8 max-[425px]:px-3 max-[425px]:text-xs"
+        >
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </header>
 
-        {error ? (
-          <Alert variant="error">
-            <span>{error}</span>
-          </Alert>
-        ) : null}
+      {error ? (
+        <Alert variant="error">
+          <span>{error}</span>
+        </Alert>
+      ) : null}
 
-        {loading ? <LoadingInline label="Loading current rates..." /> : null}
+      {loading ? <LoadingInline label="Loading current rates..." /> : null}
 
       {data ? (
         <Card variant="light" className="max-[425px]:p-3">
           <div className="grid gap-2 text-sm text-slate-700 max-[425px]:gap-1 max-[425px]:text-xs dark:text-slate-300 md:grid-cols-4">
-              <div>
-                <span className="text-slate-500">As of</span>
-                <p className="font-medium">{formatDateTime(data.as_of)}</p>
-              </div>
-              <div>
-                <span className="text-slate-500">State rates</span>
-                <p className="font-medium">{data.pagination.state.total}</p>
-              </div>
-              <div>
-                <span className="text-slate-500">County rates</span>
-                <p className="font-medium">{data.pagination.county.total}</p>
-              </div>
-              <div>
-                <span className="text-slate-500">City rates</span>
-                <p className="font-medium">{data.pagination.city.total}</p>
-              </div>
+            <div>
+              <span className="text-slate-500">As of</span>
+              <p className="font-medium">{formatDateTime(data.as_of)}</p>
             </div>
+            <div>
+              <span className="text-slate-500">State rates</span>
+              <p className="font-medium">{data.pagination.state.total}</p>
+            </div>
+            <div>
+              <span className="text-slate-500">County rates</span>
+              <p className="font-medium">{data.pagination.county.total}</p>
+            </div>
+            <div>
+              <span className="text-slate-500">City rates</span>
+              <p className="font-medium">{data.pagination.city.total}</p>
+            </div>
+          </div>
         </Card>
       ) : null}
 
       {loading && !data ? (
         <Card variant="light" className="max-[425px]:p-3">
-            <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-            <table className="min-w-full divide-y-2 divide-gray-200 text-sm dark:divide-gray-700">
-              <thead className="ltr:text-left rtl:text-right">
-                <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
-                  <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
-                    State
-                  </th>
-                  <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
-                    Rate (%)
-                  </th>
-                  <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
-                    Start Time
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                <TableSkeletonRows
-                  columns={3}
-                  rows={4}
-                  tone="light"
-                  cellClassName="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1"
-                />
-              </tbody>
-            </table>
+          <div className="mb-3 h-5 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+          <table className="min-w-full divide-y-2 divide-gray-200 text-sm dark:divide-gray-700">
+            <thead className="ltr:text-left rtl:text-right">
+              <tr className="*:font-medium *:text-gray-900 dark:*:text-white">
+                <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
+                  State
+                </th>
+                <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
+                  Rate (%)
+                </th>
+                <th className="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1 max-[425px]:text-[11px]">
+                  Start Time
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <TableSkeletonRows
+                columns={3}
+                rows={4}
+                tone="light"
+                cellClassName="px-3 py-2 whitespace-nowrap max-[425px]:px-1.5 max-[425px]:py-1"
+              />
+            </tbody>
+          </table>
         </Card>
       ) : null}
 

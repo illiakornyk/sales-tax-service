@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchJson, getApiBase } from '../lib/api';
-import { geographyStatesUrl } from '../lib/endpoints';
+import { fetchJson, getApiBase } from '@/lib/api';
+import { geographyStatesUrl } from '@/lib/endpoints';
 
 export function useStateCodes() {
   const [states, setStates] = useState<string[]>([]);
@@ -16,9 +16,12 @@ export function useStateCodes() {
     const loadStates = async () => {
       setLoading(true);
       try {
-        const response = await fetchJson<string[]>(geographyStatesUrl(apiBase), {
-          cache: 'no-store',
-        });
+        const response = await fetchJson<string[]>(
+          geographyStatesUrl(apiBase),
+          {
+            cache: 'no-store',
+          },
+        );
         if (!active) return;
 
         if (response.ok) {
@@ -32,7 +35,9 @@ export function useStateCodes() {
         if (!active) return;
         setStates([]);
         setError(
-          loadError instanceof Error ? loadError.message : 'Unable to load states.',
+          loadError instanceof Error
+            ? loadError.message
+            : 'Unable to load states.',
         );
       } finally {
         if (active) {

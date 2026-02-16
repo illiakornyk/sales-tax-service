@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Button } from '../Button';
 import { Card } from '../Card';
-import { formatDateTime } from '../../lib/format';
+import { formatDateTime } from '@/lib/format';
 import { SectionPagination } from './SectionPagination';
 import type {
   CurrentTaxRateItem,

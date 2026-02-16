@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 type AlertVariant = 'error' | 'success' | 'info';
 
@@ -10,8 +10,7 @@ type AlertProps = {
 };
 
 const variantClasses: Record<AlertVariant, string> = {
-  error:
-    'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-200',
+  error: 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-200',
   success:
     'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200',
   info: 'border-slate-500/30 bg-slate-500/10 text-slate-700 dark:text-slate-200',

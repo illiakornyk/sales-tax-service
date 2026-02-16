@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '@/lib/cn';
 
 export type ResponseDetailsField = {
   label: string;
@@ -19,7 +19,9 @@ export function ResponseDetails({ fields, className }: ResponseDetailsProps) {
             key={label}
             className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4"
           >
-            <dt className="font-medium text-gray-900 dark:text-white">{label}</dt>
+            <dt className="font-medium text-gray-900 dark:text-white">
+              {label}
+            </dt>
             <dd className="text-gray-700 sm:col-span-2 dark:text-gray-200">
               {value === null || value === undefined ? '—' : String(value)}
             </dd>

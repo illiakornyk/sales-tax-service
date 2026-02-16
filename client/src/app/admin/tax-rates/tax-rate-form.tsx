@@ -1,17 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Alert } from '../../../components/Alert';
-import { Button } from '../../../components/Button';
-import { Card } from '../../../components/Card';
-import { FormField, FormInput, FormSelect } from '../../../components/FormField';
-import { LoadingInline } from '../../../components/LoadingState';
-import { PageShell } from '../../../components/PageShell';
-import { ResponseDetails } from '../../../components/ResponseDetails';
-import { StateCodeSelectField } from '../../../components/StateCodeSelectField';
-import { useStateCodes } from '../../../hooks/use-state-codes';
-import { fetchJson, getApiBase } from '../../../lib/api';
-import { dateTimePartsToIso, isoToDateTimeLocal } from '../../../lib/datetime';
+import { Alert } from '@/components/Alert';
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { FormField, FormInput, FormSelect } from '@/components/FormField';
+import { LoadingInline } from '@/components/LoadingState';
+import { PageShell } from '@/components/PageShell';
+import { ResponseDetails } from '@/components/ResponseDetails';
+import { StateCodeSelectField } from '@/components/StateCodeSelectField';
+import { useStateCodes } from '@/hooks/use-state-codes';
+import { fetchJson, getApiBase } from '@/lib/api';
+import { dateTimePartsToIso, isoToDateTimeLocal } from '@/lib/datetime';
 import {
   buildCreateTaxRateRequestBody,
   buildSuccessFields,
@@ -48,7 +48,11 @@ export function TaxRateForm() {
   const [success, setSuccess] = useState<ApiSuccess | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
-  const { states, error: statesError, loading: statesLoading } = useStateCodes();
+  const {
+    states,
+    error: statesError,
+    loading: statesLoading,
+  } = useStateCodes();
 
   const apiEndpoint = '/api/admin/tax-rates';
   const apiBase = getApiBase();
@@ -63,9 +67,7 @@ export function TaxRateForm() {
     setPayload((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = async (
-    event: React.SyntheticEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
@@ -117,145 +119,145 @@ export function TaxRateForm() {
       mainClassName="max-w-4xl max-[425px]:gap-4"
     >
       <header>
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-500">
-            Admin Console
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight max-[425px]:text-2xl">
-            Configure tax rates
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm text-slate-600 max-[425px]:mt-2 max-[425px]:text-xs dark:text-slate-400">
-            Create a new tax rate version. State requires only state code.
-            County requires county name. City requires city id or city name
-            (state + city name).
-          </p>
+        <p className="text-xs uppercase tracking-[0.4em] text-slate-500 dark:text-slate-500">
+          Admin Console
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight max-[425px]:text-2xl">
+          Configure tax rates
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm text-slate-600 max-[425px]:mt-2 max-[425px]:text-xs dark:text-slate-400">
+          Create a new tax rate version. State requires only state code. County
+          requires county name. City requires city id or city name (state + city
+          name).
+        </p>
       </header>
 
       <Card variant="light" className="max-[425px]:p-3">
         <form className="grid gap-5 max-[425px]:gap-3" onSubmit={handleSubmit}>
           <fieldset disabled={loading} className="grid gap-5 max-[425px]:gap-3">
             <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-3">
-                <FormField label="Jurisdiction">
-                  <FormSelect
-                    value={payload.jurisdictionType}
-                    onChange={(event) =>
-                      updateField(
-                        'jurisdictionType',
-                        event.target.value as JurisdictionType,
-                      )
-                    }
-                  >
-                    <option value="STATE">STATE</option>
-                    <option value="COUNTY">COUNTY</option>
-                    <option value="CITY">CITY</option>
-                  </FormSelect>
-                </FormField>
-                <StateCodeSelectField
-                  value={payload.stateCode}
-                  states={states}
-                  loading={statesLoading}
-                  error={statesError}
-                  onChange={(value) => updateField('stateCode', value)}
-                  errorClassName="text-rose-500 dark:text-rose-300"
-                />
-                <FormField
-                  label="Rate"
-                  hint={`Min ${MIN_RATE * 100}%, max ${MAX_RATE * 100}%`}
-                  hintClassName="text-slate-500 dark:text-slate-400"
+              <FormField label="Jurisdiction">
+                <FormSelect
+                  value={payload.jurisdictionType}
+                  onChange={(event) =>
+                    updateField(
+                      'jurisdictionType',
+                      event.target.value as JurisdictionType,
+                    )
+                  }
                 >
+                  <option value="STATE">STATE</option>
+                  <option value="COUNTY">COUNTY</option>
+                  <option value="CITY">CITY</option>
+                </FormSelect>
+              </FormField>
+              <StateCodeSelectField
+                value={payload.stateCode}
+                states={states}
+                loading={statesLoading}
+                error={statesError}
+                onChange={(value) => updateField('stateCode', value)}
+                errorClassName="text-rose-500 dark:text-rose-300"
+              />
+              <FormField
+                label="Rate"
+                hint={`Min ${MIN_RATE * 100}%, max ${MAX_RATE * 100}%`}
+                hintClassName="text-slate-500 dark:text-slate-400"
+              >
+                <FormInput
+                  value={payload.rate}
+                  onChange={(event) =>
+                    updateField('rate', Number(event.target.value))
+                  }
+                  type="number"
+                  step="0.0001"
+                  min={MIN_RATE}
+                  max={MAX_RATE}
+                />
+              </FormField>
+            </div>
+
+            {showCounty ? (
+              <FormField label="County name">
+                <FormInput
+                  value={payload.countyName ?? ''}
+                  onChange={(event) =>
+                    updateField('countyName', event.target.value)
+                  }
+                  placeholder="Orange"
+                />
+              </FormField>
+            ) : null}
+
+            {showCity ? (
+              <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-2">
+                <FormField label="City ID">
                   <FormInput
-                    value={payload.rate}
+                    value={payload.cityId ?? ''}
                     onChange={(event) =>
-                      updateField('rate', Number(event.target.value))
+                      updateField('cityId', Number(event.target.value))
                     }
                     type="number"
-                    step="0.0001"
-                    min={MIN_RATE}
-                    max={MAX_RATE}
+                    min="1"
                   />
                 </FormField>
-              </div>
-
-              {showCounty ? (
-                <FormField label="County name">
+                <FormField label="City name (optional)">
                   <FormInput
-                    value={payload.countyName ?? ''}
+                    value={payload.cityName ?? ''}
                     onChange={(event) =>
-                      updateField('countyName', event.target.value)
+                      updateField('cityName', event.target.value)
                     }
-                    placeholder="Orange"
-                  />
-                </FormField>
-              ) : null}
-
-              {showCity ? (
-                <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-2">
-                  <FormField label="City ID">
-                    <FormInput
-                      value={payload.cityId ?? ''}
-                      onChange={(event) =>
-                        updateField('cityId', Number(event.target.value))
-                      }
-                      type="number"
-                      min="1"
-                    />
-                  </FormField>
-                  <FormField label="City name (optional)">
-                    <FormInput
-                      value={payload.cityName ?? ''}
-                      onChange={(event) =>
-                        updateField('cityName', event.target.value)
-                      }
-                      placeholder="Los Angeles"
-                    />
-                  </FormField>
-                </div>
-              ) : null}
-
-              <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-2">
-                <FormField label="Start time (ISO-8601)">
-                  <FormInput
-                    value={payload.startTime}
-                    onChange={(event) =>
-                      updateField('startTime', event.target.value)
-                    }
-                  />
-                </FormField>
-                <FormField label="Start date & time (calendar)">
-                  <FormInput
-                    value={localDateTimeValue}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      if (!value) return;
-                      const [nextDate, nextTime = '00:00'] = value.split('T');
-                      updateFromDateTimeParts(nextDate, nextTime);
-                    }}
-                    type="datetime-local"
-                    min={`${MIN_YEAR}-01-01T00:00`}
-                    step="60"
-                  />
-                </FormField>
-                <FormField label="Admin API key">
-                  <FormInput
-                    value={apiKey}
-                    onChange={(event) => setApiKey(event.target.value)}
-                    type="password"
+                    placeholder="Los Angeles"
                   />
                 </FormField>
               </div>
+            ) : null}
 
-              <div className="flex flex-wrap items-center gap-3 max-[425px]:gap-2">
-                <Button
-                  type="submit"
-                  variant="success"
-                  disabled={loading}
-                  className="px-6 py-2 text-sm font-semibold max-[425px]:px-3 max-[425px]:py-1.5 max-[425px]:text-xs"
-                >
-                  {loading ? 'Saving...' : 'Create rate'}
-                </Button>
-                <span className="text-xs uppercase tracking-[0.3em] text-slate-500 max-[425px]:text-[10px] max-[425px]:tracking-[0.2em] dark:text-slate-400">
-                  API {apiEndpoint} · backend {apiBase}
-                </span>
-              </div>
+            <div className="grid gap-4 max-[425px]:gap-3 md:grid-cols-2">
+              <FormField label="Start time (ISO-8601)">
+                <FormInput
+                  value={payload.startTime}
+                  onChange={(event) =>
+                    updateField('startTime', event.target.value)
+                  }
+                />
+              </FormField>
+              <FormField label="Start date & time (calendar)">
+                <FormInput
+                  value={localDateTimeValue}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (!value) return;
+                    const [nextDate, nextTime = '00:00'] = value.split('T');
+                    updateFromDateTimeParts(nextDate, nextTime);
+                  }}
+                  type="datetime-local"
+                  min={`${MIN_YEAR}-01-01T00:00`}
+                  step="60"
+                />
+              </FormField>
+              <FormField label="Admin API key">
+                <FormInput
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  type="password"
+                />
+              </FormField>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 max-[425px]:gap-2">
+              <Button
+                type="submit"
+                variant="success"
+                disabled={loading}
+                className="px-6 py-2 text-sm font-semibold max-[425px]:px-3 max-[425px]:py-1.5 max-[425px]:text-xs"
+              >
+                {loading ? 'Saving...' : 'Create rate'}
+              </Button>
+              <span className="text-xs uppercase tracking-[0.3em] text-slate-500 max-[425px]:text-[10px] max-[425px]:tracking-[0.2em] dark:text-slate-400">
+                API {apiEndpoint} · backend {apiBase}
+              </span>
+            </div>
           </fieldset>
         </form>
 
@@ -267,10 +269,7 @@ export function TaxRateForm() {
 
         {error ? (
           <div className="mt-4 max-[425px]:mt-3">
-            <Alert
-              variant="error"
-              title={`Error ${error.status || ''}`.trim()}
-            >
+            <Alert variant="error" title={`Error ${error.status || ''}`.trim()}>
               <div className="text-sm font-medium">{error.message}</div>
             </Alert>
           </div>

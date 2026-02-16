@@ -1,26 +1,26 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { AppNav } from "../components/AppNav";
-import { getThemeInitScript } from "../lib/theme";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { AppNav } from '@/components/AppNav';
+import { getThemeInitScript } from '@/lib/theme';
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "Sales Tax Service",
-  description: "Sales tax lookup and admin management",
+  title: 'Sales Tax Service',
+  description: 'Sales tax lookup and admin management',
   icons: {
-    icon: "/app_logo.svg",
-    shortcut: "/app_logo.svg",
-    apple: "/app_logo.svg",
+    icon: '/app_logo.svg',
+    shortcut: '/app_logo.svg',
+    apple: '/app_logo.svg',
   },
 };
 

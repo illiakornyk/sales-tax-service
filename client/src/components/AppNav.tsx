@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useThemePreference } from '../hooks/use-theme-preference';
-import { getApiBase } from '../lib/api';
-import { cn } from '../lib/cn';
-import type { ThemePreference } from '../lib/theme';
+import { useThemePreference } from '@/hooks/use-theme-preference';
+import { getApiBase } from '@/lib/api';
+import { cn } from '@/lib/cn';
+import type { ThemePreference } from '@/lib/theme';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Geography' },
@@ -114,7 +114,11 @@ export function AppNav() {
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 7h16M4 12h16M4 17h16"
+              />
             </svg>
           </button>
         </nav>
