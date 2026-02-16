@@ -4,9 +4,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { BigIntSerializationInterceptor } from './common/interceptors/bigint-serialization.interceptor';
 import { ENV_KEYS } from './config/constants/env.constants';
+import { JsonLogger } from './common/logging/json.logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new JsonLogger();
+  const app = await NestFactory.create(AppModule, { logger });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -34,4 +36,4 @@ async function bootstrap() {
 
   await app.listen(port);
 }
-bootstrap();
+void bootstrap();
