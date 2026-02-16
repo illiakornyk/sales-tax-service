@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsInt,
   IsISO8601,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -13,9 +14,11 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { jurisdiction_type } from '../../generated/prisma/enums';
+import { STATE_CODES } from '../../geography/constants/state-codes';
 
 export const JurisdictionType = jurisdiction_type;
 export type JurisdictionType = jurisdiction_type;
+type StateCode = (typeof STATE_CODES)[number];
 
 export class CreateTaxRateDto {
   @ApiProperty({ enum: JurisdictionType })
@@ -25,7 +28,8 @@ export class CreateTaxRateDto {
   @ApiProperty({ example: 'CA', minLength: 2, maxLength: 10 })
   @IsString()
   @Length(2, 10)
-  stateCode!: string;
+  @IsIn(STATE_CODES, { message: 'stateCode must be a valid US state code' })
+  stateCode!: StateCode;
 
   @ApiPropertyOptional({ example: 'Orange' })
   @ValidateIf(

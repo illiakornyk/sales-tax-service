@@ -8,13 +8,26 @@ import { GeographyService } from '../geography/geography.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, tax_rates } from '../generated/prisma/client';
 import { CreateTaxRateDto, JurisdictionType } from './dto/create-tax-rate.dto';
+import { GetCurrentTaxRatesQueryDto } from './dto/get-current-tax-rates.dto';
 import {
+  CurrentTaxRateItem,
+  CurrentTaxRateSectionPagination,
+  CurrentTaxRatesResponse,
   EffectiveRates,
   NormalizedCreateDto,
   TaxRateResponse,
   ZipInfo,
   ZipRateResult,
 } from './types/tax-rate.types';
+
+type TaxRateWithCity = Prisma.tax_ratesGetPayload<{
+  include: { cities: { select: { city_name: true } } };
+}>;
+
+type CurrentSectionPageResult = {
+  items: CurrentTaxRateItem[];
+  pagination: CurrentTaxRateSectionPagination;
+};
 
 @Injectable()
 export class TaxRatesService {
@@ -26,6 +39,17 @@ export class TaxRatesService {
   async createTaxRateVersion(dto: CreateTaxRateDto): Promise<TaxRateResponse> {
     const normalized = this.normalizeCreateDto(dto);
     this.validateCreateDto(normalized, dto.jurisdictionType, dto.cityId);
+
+    await this.assertStateExists(normalized.stateCode);
+    if (
+      dto.jurisdictionType === JurisdictionType.COUNTY &&
+      normalized.countyName
+    ) {
+      await this.assertCountyExists(
+        normalized.stateCode,
+        normalized.countyName,
+      );
+    }
 
     const cityId = await this.resolveCityIdForCreate(
       dto.jurisdictionType,
@@ -79,6 +103,73 @@ export class TaxRatesService {
       maxCityRate,
       zipInfo,
     );
+  }
+
+  async getCurrentActiveRates(
+    query: GetCurrentTaxRatesQueryDto,
+  ): Promise<CurrentTaxRatesResponse> {
+    const now = new Date();
+    const rates = await this.prisma.tax_rates.findMany({
+      where: { start_time: { lte: now } },
+      orderBy: [{ start_time: 'desc' }, { id: 'desc' }],
+      include: {
+        cities: {
+          select: { city_name: true },
+        },
+      },
+    });
+
+    const cityZipCodesById = await this.getCityZipCodesMap(rates);
+
+    const seen = new Set<string>();
+    const stateItems: CurrentTaxRateItem[] = [];
+    const countyItems: CurrentTaxRateItem[] = [];
+    const cityItems: CurrentTaxRateItem[] = [];
+
+    for (const rate of rates) {
+      const key = this.getCurrentRateIdentityKey(rate);
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+
+      const item = this.toCurrentTaxRateItem(rate, cityZipCodesById);
+      if (rate.jurisdiction_type === JurisdictionType.STATE) {
+        stateItems.push(item);
+      } else if (rate.jurisdiction_type === JurisdictionType.COUNTY) {
+        countyItems.push(item);
+      } else {
+        cityItems.push(item);
+      }
+    }
+
+    const statePage = this.paginateCurrentSection(stateItems, {
+      include: query.includeState ?? true,
+      skip: query.stateSkip ?? 0,
+      take: query.stateTake,
+    });
+    const countyPage = this.paginateCurrentSection(countyItems, {
+      include: query.includeCounty ?? true,
+      skip: query.countySkip ?? 0,
+      take: query.countyTake,
+    });
+    const cityPage = this.paginateCurrentSection(cityItems, {
+      include: query.includeCity ?? true,
+      skip: query.citySkip ?? 0,
+      take: query.cityTake,
+    });
+
+    return {
+      as_of: now.toISOString(),
+      state: statePage.items,
+      county: countyPage.items,
+      city: cityPage.items,
+      pagination: {
+        state: statePage.pagination,
+        county: countyPage.pagination,
+        city: cityPage.pagination,
+      },
+    };
   }
 
   private normalizeCreateDto(dto: CreateTaxRateDto): NormalizedCreateDto {
@@ -177,6 +268,29 @@ export class TaxRatesService {
     }
 
     return null;
+  }
+
+  private async assertStateExists(stateCode: string): Promise<void> {
+    const count = await this.prisma.zip_codes.count({
+      where: { state_code: stateCode },
+    });
+    if (count === 0) {
+      throw new BadRequestException(`State not found for ${stateCode}`);
+    }
+  }
+
+  private async assertCountyExists(
+    stateCode: string,
+    countyName: string,
+  ): Promise<void> {
+    const count = await this.prisma.zip_codes.count({
+      where: { state_code: stateCode, county_name: countyName },
+    });
+    if (count === 0) {
+      throw new BadRequestException(
+        `County not found for ${stateCode} ${countyName}`,
+      );
+    }
   }
 
   private async createTaxRateRow(
@@ -356,7 +470,14 @@ export class TaxRatesService {
     return {
       state: this.toTaxRateResponse(stateRate),
       county: this.toTaxRateResponse(countyRate),
-      city: cityRates.map((rate) => this.toTaxRateResponse(rate)),
+      city: cityRates.map((rate) =>
+        this.toTaxRateResponse(
+          rate,
+          rate.city_id !== null
+            ? (cityNameById.get(rate.city_id) ?? null)
+            : null,
+        ),
+      ),
       total_rate: totalRate,
       breakdown: {
         state_rate: stateRate.rate.toString(),
@@ -371,17 +492,147 @@ export class TaxRatesService {
     return a.greaterThan(b) ? a : b;
   }
 
+  private async getCityZipCodesMap(
+    rates: TaxRateWithCity[],
+  ): Promise<Map<bigint, string[]>> {
+    const cityIds = Array.from(
+      new Set(
+        rates
+          .filter(
+            (rate) =>
+              rate.jurisdiction_type === JurisdictionType.CITY &&
+              rate.city_id !== null,
+          )
+          .map((rate) => rate.city_id as bigint),
+      ),
+    );
+
+    if (cityIds.length === 0) {
+      return new Map();
+    }
+
+    const cityZipRows = await this.prisma.zip_cities.findMany({
+      where: { city_id: { in: cityIds } },
+      select: { city_id: true, zip: true },
+      orderBy: [{ city_id: 'asc' }, { zip: 'asc' }],
+    });
+
+    const zipCodesByCity = new Map<bigint, string[]>();
+    for (const row of cityZipRows) {
+      const existing = zipCodesByCity.get(row.city_id) ?? [];
+      if (!existing.includes(row.zip)) {
+        existing.push(row.zip);
+      }
+      zipCodesByCity.set(row.city_id, existing);
+    }
+
+    return zipCodesByCity;
+  }
+
+  private getCurrentRateIdentityKey(rate: tax_rates): string {
+    if (rate.jurisdiction_type === JurisdictionType.STATE) {
+      return `STATE|${rate.state_code}`;
+    }
+    if (rate.jurisdiction_type === JurisdictionType.COUNTY) {
+      return `COUNTY|${rate.state_code}|${rate.county_name ?? ''}`;
+    }
+    return `CITY|${rate.state_code}|${rate.city_id?.toString() ?? ''}`;
+  }
+
+  private toCurrentTaxRateItem(
+    rate: TaxRateWithCity,
+    cityZipCodesById: Map<bigint, string[]>,
+  ): CurrentTaxRateItem {
+    const base: CurrentTaxRateItem = {
+      jurisdiction_type: rate.jurisdiction_type,
+      state_code: rate.state_code,
+      rate_percent: rate.rate.mul(100).toString(),
+      start_time: rate.start_time.toISOString(),
+    };
+
+    if (rate.county_name) {
+      base.county_name = rate.county_name;
+    }
+
+    if (rate.city_id !== null) {
+      base.city_id = rate.city_id.toString();
+      base.city_name = rate.cities?.city_name ?? null;
+      base.zip_codes = cityZipCodesById.get(rate.city_id) ?? [];
+    }
+
+    return base;
+  }
+
+  private paginateCurrentSection(
+    items: CurrentTaxRateItem[],
+    options: {
+      include: boolean;
+      skip: number;
+      take?: number;
+    },
+  ): CurrentSectionPageResult {
+    if (!options.include) {
+      return {
+        items: [],
+        pagination: {
+          included: false,
+          enabled: false,
+          total: 0,
+          skip: 0,
+          take: null,
+          has_more: false,
+        },
+      };
+    }
+
+    const total = items.length;
+    const skip = Math.max(0, options.skip);
+
+    if (options.take === undefined) {
+      return {
+        items,
+        pagination: {
+          included: true,
+          enabled: false,
+          total,
+          skip: 0,
+          take: null,
+          has_more: false,
+        },
+      };
+    }
+
+    const take = Math.max(1, options.take);
+    const pagedItems = items.slice(skip, skip + take);
+
+    return {
+      items: pagedItems,
+      pagination: {
+        included: true,
+        enabled: true,
+        total,
+        skip,
+        take,
+        has_more: skip + pagedItems.length < total,
+      },
+    };
+  }
+
   private formatTimestamp(at: Date): string {
     return at.toISOString();
   }
 
-  private toTaxRateResponse(rate: tax_rates): TaxRateResponse {
+  private toTaxRateResponse(
+    rate: tax_rates,
+    cityName: string | null = null,
+  ): TaxRateResponse {
     return {
       id: rate.id.toString(),
       jurisdiction_type: rate.jurisdiction_type,
       state_code: rate.state_code,
       county_name: rate.county_name,
       city_id: rate.city_id !== null ? rate.city_id.toString() : null,
+      city_name: cityName,
       rate: rate.rate.toString(),
       start_time: rate.start_time.toISOString(),
     };

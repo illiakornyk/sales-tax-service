@@ -17,4 +17,9 @@ export class GeographyController {
       query.take,
     );
   }
+
+  @Get('states')
+  listStates() {
+    return this.geographyService.getStateCodes();
+  }
 }

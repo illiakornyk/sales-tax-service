@@ -15,6 +15,11 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new BigIntSerializationInterceptor());
 
+  app.enableCors({
+    origin: ['http://localhost:3001'],
+    credentials: false,
+  });
+
   const config = new DocumentBuilder().setTitle('Sales tax service').build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

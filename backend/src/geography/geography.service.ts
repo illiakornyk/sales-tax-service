@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { STATE_CODES } from './constants/state-codes';
 import { ZipCodeSummary, ZipCodeWithCities } from './types/geography.types';
 
 @Injectable()
@@ -44,5 +45,9 @@ export class GeographyService {
         primary_city_name: true,
       },
     });
+  }
+
+  getStateCodes(): readonly string[] {
+    return STATE_CODES;
   }
 }
