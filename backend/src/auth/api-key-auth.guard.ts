@@ -4,8 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ROLES, type UserRole } from './constants/roles.constants';
 
-type ApiUser = { role: 'ADMIN' };
+type ApiUser = { role: UserRole };
 
 @Injectable()
 export class ApiKeyAuthGuard implements CanActivate {
@@ -22,7 +23,7 @@ export class ApiKeyAuthGuard implements CanActivate {
     }
 
     if (apiKey === process.env.ADMIN_API_KEY) {
-      request.user = { role: 'ADMIN' };
+      request.user = { role: ROLES.ADMIN };
       return true;
     }
 
