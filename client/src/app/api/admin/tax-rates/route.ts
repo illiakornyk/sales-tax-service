@@ -1,13 +1,11 @@
-const API_BASE_URL =
-  process.env.API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:3000";
+import { getApiBase } from '../../../../lib/api';
 
 export async function POST(request: Request) {
   const apiKey = request.headers.get("x-api-key") ?? "";
   const body = await request.text();
+  const apiBase = getApiBase();
 
-  const response = await fetch(`${API_BASE_URL}/tax-rates`, {
+  const response = await fetch(`${apiBase}/tax-rates`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
