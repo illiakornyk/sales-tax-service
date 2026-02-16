@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { REQUIRED_ENV_KEYS } from './config/constants/env.constants';
 import { GeographyModule } from './geography/geography.module';
+import { HealthModule } from './health/health.module';
 import { TaxRatesModule } from './tax-rates/tax-rates.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { TaxRatesModule } from './tax-rates/tax-rates.module';
         return config;
       },
     }),
+    HealthModule,
     GeographyModule,
     TaxRatesModule,
   ],
