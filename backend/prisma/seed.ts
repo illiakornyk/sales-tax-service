@@ -5,6 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { Prisma, PrismaClient } from '../src/generated/prisma/client';
+import { buildDatabaseUrl } from '../src/config/utils/database-url.util';
 
 const ZIP_CHUNK_SIZE = 2000;
 const CITY_CHUNK_SIZE = 2000;
@@ -12,10 +13,7 @@ const JOIN_CHUNK_SIZE = 5000;
 const LOG_EVERY = 1000;
 const UPDATE_EXISTING_ZIPS = true;
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error('DATABASE_URL is not set');
-}
+const connectionString = buildDatabaseUrl();
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });

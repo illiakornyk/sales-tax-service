@@ -1,15 +1,22 @@
-const DEFAULT_API_BASE = 'http://localhost:3000';
+function getRequiredEnvValue(key: string, value: string | undefined): string {
+  if (!value) {
+    throw new Error(`${key} is not set`);
+  }
+  return value;
+}
 
 export const getApiBase = () => {
   if (typeof window === 'undefined') {
-    return (
-      process.env.API_BASE_URL ??
-      process.env.NEXT_PUBLIC_API_BASE_URL ??
-      DEFAULT_API_BASE
+    return getRequiredEnvValue(
+      'API_BASE_URL or NEXT_PUBLIC_API_BASE_URL',
+      process.env.API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL,
     );
   }
 
-  return process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE;
+  return getRequiredEnvValue(
+    'NEXT_PUBLIC_API_BASE_URL',
+    process.env.NEXT_PUBLIC_API_BASE_URL,
+  );
 };
 
 type FetchJsonResult<T> =

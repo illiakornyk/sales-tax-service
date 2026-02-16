@@ -68,22 +68,22 @@ import { TaxRatesService } from './tax-rates.service';
 
 type PrismaMock = {
   zip_codes: {
-    count: jest.Mock;
+    count: jest.Mock<Promise<number>, [unknown]>;
   };
   cities: {
-    findUnique: jest.Mock;
+    findUnique: jest.Mock<Promise<unknown>, [unknown]>;
   };
   zip_cities: {
-    findMany: jest.Mock;
+    findMany: jest.Mock<Promise<unknown[]>, [unknown]>;
   };
   tax_rates: {
-    create: jest.Mock;
-    findMany: jest.Mock;
+    create: jest.Mock<Promise<unknown>, [{ data: unknown }]>;
+    findMany: jest.Mock<Promise<unknown[]>, [unknown]>;
   };
 };
 
 type GeographyMock = {
-  getZipCode: jest.Mock;
+  getZipCode: jest.Mock<Promise<unknown>, [string]>;
 };
 
 type PrismaDependency = ConstructorParameters<typeof TaxRatesService>[0];
@@ -97,22 +97,22 @@ describe('TaxRatesService', () => {
   beforeEach(() => {
     prismaMock = {
       zip_codes: {
-        count: jest.fn(),
+        count: jest.fn<Promise<number>, [unknown]>(),
       },
       cities: {
-        findUnique: jest.fn(),
+        findUnique: jest.fn<Promise<unknown>, [unknown]>(),
       },
       zip_cities: {
-        findMany: jest.fn(),
+        findMany: jest.fn<Promise<unknown[]>, [unknown]>(),
       },
       tax_rates: {
-        create: jest.fn(),
-        findMany: jest.fn(),
+        create: jest.fn<Promise<unknown>, [{ data: unknown }]>(),
+        findMany: jest.fn<Promise<unknown[]>, [unknown]>(),
       },
     };
 
     geographyMock = {
-      getZipCode: jest.fn(),
+      getZipCode: jest.fn<Promise<unknown>, [string]>(),
     };
 
     service = new TaxRatesService(
@@ -147,13 +147,16 @@ describe('TaxRatesService', () => {
     expect(prismaMock.zip_codes.count).toHaveBeenCalledWith({
       where: { state_code: 'CA' },
     });
-    expect(prismaMock.tax_rates.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        jurisdiction_type: JurisdictionType.STATE,
-        state_code: 'CA',
-        county_name: null,
-      }),
-    });
+    const firstCreateCall: unknown =
+      prismaMock.tax_rates.create.mock.calls[0]?.[0];
+    expect(isTaxRateCreateCall(firstCreateCall)).toBe(true);
+    if (isTaxRateCreateCall(firstCreateCall)) {
+      expect(firstCreateCall.data.jurisdiction_type).toBe(
+        JurisdictionType.STATE,
+      );
+      expect(firstCreateCall.data.state_code).toBe('CA');
+      expect(firstCreateCall.data.county_name).toBeNull();
+    }
     expect(result).toEqual(
       expect.objectContaining({
         id: '10',
@@ -284,4 +287,34 @@ function makeRateRecord(
     created_by_user_id: null,
     ...overrides,
   };
+}
+
+function isTaxRateCreateCall(value: unknown): value is {
+  data: {
+    jurisdiction_type: string;
+    state_code: string;
+    county_name: string | null;
+  };
+} {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const data = (value as { data?: unknown }).data;
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
+
+  const maybeData = data as {
+    jurisdiction_type?: unknown;
+    state_code?: unknown;
+    county_name?: unknown;
+  };
+
+  return (
+    typeof maybeData.jurisdiction_type === 'string' &&
+    typeof maybeData.state_code === 'string' &&
+    (typeof maybeData.county_name === 'string' ||
+      maybeData.county_name === null)
+  );
 }
