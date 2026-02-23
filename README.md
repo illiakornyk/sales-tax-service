@@ -5,6 +5,27 @@ It includes a NestJS + Prisma backend (ZIP-based tax calculation, versioned rate
 
 ## Configuration
 
+### Required environment variables
+
+#### Backend (`backend/.env`)
+
+- `DB_HOST` - PostgreSQL host (for local run: `localhost`)
+- `DB_PORT` - PostgreSQL port (for local run: `5432`)
+- `DB_NAME` - PostgreSQL database name
+- `DB_USER` - PostgreSQL user
+- `DB_PASSWORD` - PostgreSQL password
+- `ADMIN_API_KEY` - API key for admin-only endpoints
+- `PORT` - backend HTTP server port
+- `CORS_ORIGIN` - allowed frontend origin (example: `http://localhost:3001`)
+
+#### Frontend (`client/.env.local`)
+
+- `NEXT_PUBLIC_API_BASE_URL` - backend base URL used in browser requests (example: `http://localhost:3000`)
+
+#### Optional frontend server-side variable
+
+- `API_BASE_URL` - backend base URL for Next.js server-side routes (if unset, server-side code uses `NEXT_PUBLIC_API_BASE_URL`)
+
 ## Run the application
 
 ### 1) Start backend first
@@ -27,27 +48,6 @@ npm run dev
 ```
 
 Frontend runs on `http://localhost:3001`.
-
-### Required environment variables
-
-#### Backend (`backend/.env`)
-
-- `DB_HOST` - PostgreSQL host (for local run: `localhost`)
-- `DB_PORT` - PostgreSQL port (for local run: `5432`)
-- `DB_NAME` - PostgreSQL database name
-- `DB_USER` - PostgreSQL user
-- `DB_PASSWORD` - PostgreSQL password
-- `ADMIN_API_KEY` - API key for admin-only endpoints
-- `PORT` - backend HTTP server port
-- `CORS_ORIGIN` - allowed frontend origin (example: `http://localhost:3001`)
-
-#### Frontend (`client/.env.local`)
-
-- `NEXT_PUBLIC_API_BASE_URL` - backend base URL used in browser requests (example: `http://localhost:3000`)
-
-#### Optional frontend server-side variable
-
-- `API_BASE_URL` - backend base URL for Next.js server-side routes (if unset, server-side code uses `NEXT_PUBLIC_API_BASE_URL`)
 
 ## Health Check Confirmation
 
