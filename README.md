@@ -1,3 +1,8 @@
+## Sales Tax Service
+
+Sales Tax Service is a full-stack application for US sales tax lookup and tax-rate management.  
+It includes a NestJS + Prisma backend (ZIP-based tax calculation, versioned rates, health checks, JSON logging, graceful shutdown) and a Next.js frontend for geography browsing, tax lookup, current rates view, and admin rate configuration.
+
 ## Configuration
 
 ### Required environment variables
