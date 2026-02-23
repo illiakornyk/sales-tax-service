@@ -1,9 +1,32 @@
-## Sales Tax Service
+# Sales Tax Service
 
-Sales Tax Service is a full-stack application for US sales tax lookup and tax-rate management.  
+Sales Tax Service is a full-stack application for US sales tax lookup and tax-rate management.
 It includes a NestJS + Prisma backend (ZIP-based tax calculation, versioned rates, health checks, JSON logging, graceful shutdown) and a Next.js frontend for geography browsing, tax lookup, current rates view, and admin rate configuration.
 
 ## Configuration
+
+## Run the application
+
+### 1) Start backend first
+
+```bash
+cd backend
+npm install
+docker compose up -d
+npm run start:dev
+```
+
+Backend runs on `http://localhost:3000`.
+
+### 2) Start frontend second
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Frontend runs on `http://localhost:3001`.
 
 ### Required environment variables
 
