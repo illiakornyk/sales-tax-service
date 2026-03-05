@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tax_service_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password123}
+      POSTGRES_DB: ${DB_NAME:-sales_tax_db}
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d sales_tax_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: app
+    restart: always
+    environment:
+      - PORT=8080
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3001}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=password123
+      - DB_NAME=sales_tax_db
+      - ADMIN_API_KEY=test
+      - DATABASE_URL=postgresql://admin:password123@db:5432/sales_tax_db?schema=public
+    ports:
+      - '8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy

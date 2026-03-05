@@ -1,45 +1,53 @@
 # Sales Tax Service
 
-Sales Tax Service is a full-stack application for US sales tax lookup and tax-rate management.
-It includes a NestJS + Prisma backend (ZIP-based tax calculation, versioned rates, health checks, JSON logging, graceful shutdown) and a Next.js frontend for geography browsing, tax lookup, current rates view, and admin rate configuration.
+Sales Tax Service is a modern, full-stack web application designed for US sales tax lookup and tax-rate management. The project is built with a strong focus on clean architecture, scalable deployment, and best practices in both software engineering and DevOps.
 
-## Configuration
+This repository serves as a showcase of my skills across the entire stack—from creating responsive user interfaces to designing robust backend systems and automating infrastructure pipelines.
 
-### Required environment variables
+## 🚀 Tech Stack
 
-#### Backend (`backend/.env`)
+### Frontend
 
-- `DB_HOST` - PostgreSQL host (for local run: `localhost`)
-- `DB_PORT` - PostgreSQL port (for local run: `5432`)
-- `DB_NAME` - PostgreSQL database name
-- `DB_USER` - PostgreSQL user
-- `DB_PASSWORD` - PostgreSQL password
-- `ADMIN_API_KEY` - API key for admin-only endpoints
-- `PORT` - backend HTTP server port
-- `CORS_ORIGIN` - allowed frontend origin (example: `http://localhost:3001`)
+- **Next.js**: React framework for server-side rendering and optimized performance.
+- **Tailwind CSS**: Utility-first CSS framework for rapid and responsive styling.
+- **HyperUI**: Collection of free, accessible Tailwind CSS components for clean UI design.
 
-#### Frontend (`client/.env.local`)
+### Backend
 
-- `NEXT_PUBLIC_API_BASE_URL` - backend base URL used in browser requests (example: `http://localhost:3000`)
+- **NestJS**: Progressive Node.js framework for building efficient, reliable, and scalable server-side applications.
+- **Prisma ORM**: Next-generation Node.js and TypeScript ORM for seamless database access and migrations.
+- **PostgreSQL**: Robust, open-source relational database.
 
-#### Optional frontend server-side variable
+### DevOps & Infrastructure (Implementation In Progress)
 
-- `API_BASE_URL` - backend base URL for Next.js server-side routes (if unset, server-side code uses `NEXT_PUBLIC_API_BASE_URL`)
+- **Docker & Docker Compose**: Multi-stage containerized builds ensuring identical environments across development, testing, and production.
+- **CI/CD (GitHub Actions)**: Automated grading and testing pipelines on every push.
+- **Observability**: Structured JSON logging and container healthchecks (`pg_isready`) for resilient system monitoring.
 
-## Run the application
+## 🌟 Key Features
 
-### 1) Start backend first
+- **Geography Browsing & Tax Lookup**: Calculate accurate ZIP-based taxes and view current rates.
+- **Admin Rate Configuration**: Secure endpoints for managing versioned tax rates.
+- **Resilient Architecture**: App features a dedicated `/health` endpoint that accurately reports system degradation (503) if database connectivity drops.
+- **Graceful Shutdown**: The Node.js server correctly handles `SIGTERM` signals to finish processing requests before exiting cleanly.
+
+## ⚙️ How to Run Locally
+
+The entire application stack (backend + database) is fully containerized for a smooth developer experience.
+
+### 1. Start the Environment
+
+Run the following command in the root directory to spin up the PostgreSQL database and the NestJS backend:
 
 ```bash
-cd backend
-npm install
-docker compose up -d
-npm run start:dev
+docker compose up -d --build
 ```
 
-Backend runs on `http://localhost:3000`.
+*The backend will be available on `http://localhost:8080`.*
 
-### 2) Start frontend second
+### 2. Start the Frontend
+
+In a separate terminal, navigate to the client folder to start the Next.js web application:
 
 ```bash
 cd client
@@ -47,33 +55,21 @@ npm install
 npm run dev
 ```
 
-Frontend runs on `http://localhost:3001`.
+*The frontend will be available on `http://localhost:3000`.*
 
-## Health Check Confirmation
+## 🧪 Testing and CI
 
-### `GET /health` returns `200` when DB is connected
+This repository uses automated GitHub Actions workflows to validate code integrity on every commit.
 
-![Health check OK](assets/ok_health_check.png)
-
-### `GET /health` returns `503` when DB is stopped
-
-![Health check degraded](assets/degraded_health_check.png)
-
-## Example JSON Logs (startup)
+You can run the same automated tests locally using the grading script:
 
 ```bash
-{"timestamp":"2026-02-16T17:20:40.112Z","level":"INFO","message":"Starting Nest application...","context":"NestFactory"}
-{"timestamp":"2026-02-16T17:20:40.169Z","level":"INFO","message":"AppModule dependencies initialized","context":"InstanceLoader"}
-{"timestamp":"2026-02-16T17:20:40.173Z","level":"INFO","message":"HealthModule dependencies initialized","context":"InstanceLoader"}
-{"timestamp":"2026-02-16T17:20:40.180Z","level":"INFO","message":"Mapped {/health, GET} route","context":"RouterExplorer"}
-{"timestamp":"2026-02-16T17:20:40.247Z","level":"INFO","message":"Nest application successfully started","context":"NestApplication"}
+./tests/lab1_test.sh
 ```
 
-![Startup logs screenshot](assets/startup.png)
+This script validates:
 
-## Shutdown Confirmation
-
-After sending `kill <pid>` (`SIGTERM`) to the backend process, the application logs graceful shutdown start/completion and exits cleanly.
-
-![Stop process command](assets/stop_process.png)
-![Graceful shutdown logs](assets/graceful_shutdown.png)
+1. Container runtime status.
+2. API Health Check (`200 OK`).
+3. Standardized JSON Logging.
+4. System Resilience and failure recovery (`503 Service Unavailable` handling).
