@@ -1,0 +1,35 @@
+name: Lab 3 Kubernetes Grading
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  kubernetes-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build backend image locally
+        run: |
+          docker build -t ecommerce-app:local -f backend/Dockerfile backend/
+
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.9.0
+
+      - name: Load local image into Kind
+        run: |
+          kind load docker-image ecommerce-app:local --name chart-testing
+
+      - name: Deploy Kubernetes Manifests
+        run: |
+          kubectl apply -f k8s/
+          # Wait a few seconds for resources to be registered before rolling out checks
+          sleep 5
+
+      - name: Run Master Validation Script
+        run: |
+          chmod +x ./tests/lab3_test.sh
+          ./tests/lab3_test.sh
